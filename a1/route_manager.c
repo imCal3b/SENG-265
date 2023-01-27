@@ -5,7 +5,7 @@
  *  @author Jose O.
  *  @author Saasha J.
  *  @author Victoria L.
- *  @author STUDENT_NAME
+ *  @author Brayden Shkwarok V00866278
  *
  */
 #include <stdio.h>
