@@ -5,7 +5,7 @@
  *  @author Jose O.
  *  @author Saasha J.
  *  @author Victoria L.
- *  @author STUDENT_NAME
+ *  @author BRAYDEN SHKWAROK V00866278
  *
  */
 #include <stdio.h>
@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
 }
 
 /*
-FUNCTION: looks through the arguments specified when running the program
+Function: looks through the arguments specified when running the program
 Parameters: int argc - the number of arguments
             char **argv - a pointer to the array of pointers pointing to the
             specified arguments
