@@ -27,7 +27,31 @@ void read_arguments();
 int main(int argc, char *argv[])
 {
     // TODO: your code.
-    read_arguments(argc,argv);
+    char *data_fields[13], *arguments[13];
+    char **inputs[2] = {data_fields, arguments};
+
+    for (int i=0;i < 13;i++) {
+        char f_val[20] = "test f", a_val[40] = "test a";
+        data_fields[i] = f_val;
+        arguments[i] = a_val;
+    }
+
+    printf("string test: %s\n",inputs[0][0]);
+
+    printf("fld_add: %p arg_add: %p \n\n",&inputs[0],&inputs[1]);
+    
+    
+    for (int i=0;i<2;i++) {
+        printf("f_add: %p a_add: %p \n",&data_fields[i],&arguments[i]);
+    }
+
+    printf("argc: %d\n\n",argc);
+    read_arguments(argc,argv,1,inputs);
+
+    for (int i=0;i<argc-1;i++) {
+
+        printf("f:%s | a: %s \n",data_fields[i],arguments[i]);
+    }
 
     exit(0);
 }
@@ -40,14 +64,41 @@ Parameters: int argc - the number of arguments
 return: NA
 PreConditions: must be at least one argument specified at program call
 */
-void read_arguments(int argc, char **argv)
+void read_arguments(int argc, char **argv, int count, char **inputs_ptr)
 {
-    char *data_field[13], *argument[13];
+    if (argc == 1) {
+        printf("no arguments given\n");
+        return;
 
-    if (argc > 0) {
-        for (int i=0;i<argc;i++) {
-            printf("%s \n",*(argv + i));
-        }
+    } else if (count == argc || count > 13) {
+        printf("all arguments read: %d arguments\n\n",--count);
+        return;
+
+    } else {
+        printf("reading fields\n");
+        char *fields_ptr = inputs_ptr[0];
+        char *arguments_ptr = inputs_ptr[1];
+
+        char field[20], argument[40]; 
+        int arr_pos_os =(count - 1);
+        // printf("array offset: %d\n",arr_pos_os);
+
+        sscanf(*(argv+count),"--%[A-Z]=%[^\t\n]",field,argument);
+        printf("field: %s argument: %s\n",field,argument);
+
+        // fields_ptr += arr_pos_os;
+        (*fields_ptr) = *field;
+        
+        // arguments_ptr += arr_pos_os;
+        *arguments_ptr = *argument;
+        
+        printf("f_add: %p a_add: %p\n\n",fields_ptr,arguments_ptr);
+        //printf("from ptr: %s\n\n", *fields_ptr);
+
+
+        return read_arguments(argc,argv,++count,inputs_ptr);
     }
 }
+
+// printf("in0_add: %p in1_add: %p\n",&*inputs_ptr[0],&*inputs_ptr[1]);
 
