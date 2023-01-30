@@ -57,12 +57,7 @@ int main(int argc, char * argv[])
 
     read_arguments(argc,argv,1,inputs);
 
-    // for (int i=0;i < argc-1;++i) {
-    //     printf("field: %s arg: %s\n",inputs[i].data_field,inputs[i].argument);
-    // }
-
     FILE * data_file = fopen(inputs[0].argument,"r");
-    if (data_file != NULL) printf("file read ok!\n\n");
 
     read_file(data_file,inputs,argc-1);
 
@@ -136,19 +131,15 @@ void allocate_data(char * token, struct file_line * data_ptr)
     printf("inside allocate_data...\n");
 
     strcpy(data_ptr->airline_name,token);
-    // printf("name: %s | ",data_ptr->airline_name);
 
     token = strtok(NULL, ",");
     strcpy(data_ptr->airline_icao_code,token);
-    // printf("icao: %s | ",data_ptr->airline_icao_code);
 
     token = strtok(NULL, ",");
     strcpy(data_ptr->airline_country,token);
-    // printf("ctry: %s | ",data_ptr->airline_country);
 
     token = strtok(NULL, ",");
     strcpy(data_ptr->from_airport_name,token);
-    // printf("a_nm: %s\n",data_ptr->from_airport_name);
 
     token = strtok(NULL, ",");
     strcpy(data_ptr->from_airport_city,token);
@@ -272,20 +263,3 @@ int compare(struct file_line data, struct input inputs[], int num_arg, int arg_c
     }
 
 }
-
-
-        // sscanf(line,"%s,%s,%s,%s,%s,%s,%s,%d,%s,%s,%s,%s,%d,",
-        //     data[i].airline_name,
-        //     data[i].airline_icao_code,
-        //     data[i].airline_country,
-        //     data[i].from_airport_name,
-        //     data[i].from_airport_city,
-        //     data[i].from_airport_country,
-        //     data[i].from_airport_icao_code,
-        //     data[i].from_airport_altitude,
-        //     data[i].to_airport_name,
-        //     data[i].to_airport_city,
-        //     data[i].to_airport_country,
-        //     data[i].to_airport_icao_code,
-        //     data[i].to_airport_altitude
-        //     ); 
