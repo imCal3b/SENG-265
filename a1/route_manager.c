@@ -50,13 +50,20 @@ struct file_line {
  * @param argv The list of arguments passed to the program.
  * @return int 0: No errors; 1: Errors produced.
  *
- */
+ */ //-------------------------------------------------
 int main(int argc, char * argv[])
 {
     // TODO: your code.
+    printf("\n---------------\n ROUTE MANAGER\n---------------\n\n");
+
     struct input inputs[13];
 
     read_arguments(argc,argv,1,inputs);
+
+    for (int i=0;i < argc-1;i++) 
+    {
+        printf("field: %s | arg: %s\n",inputs[i].data_field,inputs[i].argument);
+    }
 
     FILE * data_file = fopen(inputs[0].argument,"r");
 
@@ -64,6 +71,7 @@ int main(int argc, char * argv[])
 
     exit(0);
 }
+//------------------------------------------------------
 
 /*
 Function:   looks through the arguments specified when running the program.
@@ -96,40 +104,55 @@ void read_arguments(int argc, char ** argv, int arg_index, struct input cur_ptr[
 }
 
 /*
-Function:   read the input file and compare input arguments with each file row
-Parameters: 
+Function:   read the input file and compare input arguments with each file row.
+Parameters: file * stream - the file item we want to read using the function.
+            struct input inputs[] - the input fields/arguments we want to use
+            to search the file.
+            int num_arg - the number of arguments from the program call.
+return: NA
+PreConditions: must have a file to input into the function.
 */
 void read_file(FILE * stream, struct input inputs[], int num_arg)
 {
     printf("\nreading file...\n");
-    int count = 1;
+    int count = 2;
     struct file_line data;
     char line[1024];
     fgets(line,1024,stream); // used to bypass header-
-    while (count < 10) 
+    while (fgets(line,1024,stream)) 
     {
-        printf("reading line: %d\n",count);
-        fgets(line,1024,stream);
+        // printf("reading line: %d\n",count++);
+        // fgets(line,1024,stream);
         char * token = strtok_single(line,",");
         allocate_data(token,&data);
 
         if (compare(data,inputs,num_arg,0) == 1) 
         {
-            printf("- MATHCING LINE -");
+            printf("- MATHCING ITEM - (line %d)\n",count);
         } 
         else 
-        {}
-        printf("\n");
+        {
+            // printf("... no match ...\n");
+        }
+        // printf("\n");
         ++count;
     }
 }
 
+/*
+Function:   used to parse the line item from the data file into the
+            respective data fields.
+Parameters: char * token - pointer to the first token value from strtok_single().
+            struct file_line * data_ptr - pointer to the file_line struct so we
+            can access and store tokens to the apporopriate data field variable.
+Return: NA
+PreConditions: NA
+*/
 void allocate_data(char * token, struct file_line * data_ptr)
 {
-    printf("inside allocate_data...\n");
+    // printf("inside allocate_data...\n");
 
     strcpy(data_ptr->airline_name,token);
-    printf("check 1\n");
 
     token = strtok_single(NULL, ",");
     strcpy(data_ptr->airline_icao_code,token);
@@ -148,47 +171,40 @@ void allocate_data(char * token, struct file_line * data_ptr)
 
     token = strtok_single(NULL, ",");
     strcpy(data_ptr->from_airport_icao_code,token);
-    printf("check 2\n");
 
     token = strtok_single(NULL, ",");
     data_ptr->from_airport_altitude = atoi(token);
-    printf("check 3 - integer store\n");
 
     token = strtok_single(NULL, ",");
     strcpy(data_ptr->to_airport_name,token);
-    printf("check 4\n");
 
     token = strtok_single(NULL, ",");
     strcpy(data_ptr->to_airport_city,token);
-    printf("check 5\n");
 
     token = strtok_single(NULL, ",");
     strcpy(data_ptr->to_airport_country,token);
-    printf("check 6\n");
 
     token = strtok_single(NULL, ",");
     strcpy(data_ptr->to_airport_icao_code,token);
-    printf("check 7\n");
 
     token = strtok_single(NULL, ",");
     data_ptr->to_airport_altitude = atoi(token);
-    printf("check 8\n");
 
-    printf("%s,%s,%s,%s,%s,%s,%s,%d,%s,%s,%s,%s,%d\n\n",
-        data_ptr->airline_name,
-        data_ptr->airline_icao_code,
-        data_ptr->airline_country,
-        data_ptr->from_airport_name,
-        data_ptr->from_airport_city,
-        data_ptr->from_airport_country,
-        data_ptr->from_airport_icao_code,
-        data_ptr->from_airport_altitude,
-        data_ptr->to_airport_name,
-        data_ptr->to_airport_city,
-        data_ptr->to_airport_country,
-        data_ptr->to_airport_icao_code,
-        data_ptr->to_airport_altitude
-        );
+    // printf("%s,%s,%s,%s,%s,%s,%s,%d,%s,%s,%s,%s,%d\n\n",
+    //     data_ptr->airline_name,
+    //     data_ptr->airline_icao_code,
+    //     data_ptr->airline_country,
+    //     data_ptr->from_airport_name,
+    //     data_ptr->from_airport_city,
+    //     data_ptr->from_airport_country,
+    //     data_ptr->from_airport_icao_code,
+    //     data_ptr->from_airport_altitude,
+    //     data_ptr->to_airport_name,
+    //     data_ptr->to_airport_city,
+    //     data_ptr->to_airport_country,
+    //     data_ptr->to_airport_icao_code,
+    //     data_ptr->to_airport_altitude
+    //     );
 }
 
 /*
@@ -205,7 +221,9 @@ PreConditions:  must have line items and an input argument to compare against. I
 */
 int compare(struct file_line data, struct input inputs[], int num_arg, int arg_cnt)
 {
-    printf("comparing %s...\n",inputs[arg_cnt].data_field);
+    if (strcmp(inputs[arg_cnt].data_field, "DATA") == 0) return compare(data,inputs,num_arg,++arg_cnt);
+    
+    // printf("arg_count: %d\n",arg_cnt);
     if (arg_cnt+1 == num_arg && strcmp(inputs[arg_cnt].data_field, "DATA") == 0)
     {
         printf("no arguments!\n");
@@ -213,12 +231,14 @@ int compare(struct file_line data, struct input inputs[], int num_arg, int arg_c
     } 
     if (arg_cnt == num_arg) 
     {
-        printf("MATCH!\n");
+        // printf("MATCH!\n");
         return 1;
     }
-
+    
+    // printf("comparing %s...\n",inputs[arg_cnt].data_field);
     if (strcmp(inputs[arg_cnt].data_field, "AIRLINE") == 0)
     {
+        // printf("AIRLINE:\nInput: %s File: %s %s\n",inputs[arg_cnt].argument,data.airline_icao_code,data.airline_name);
         if (strcmp(inputs[arg_cnt].argument, data.airline_icao_code) == 0 || 
             strcmp(inputs[arg_cnt].argument, data.airline_name) == 0)
         {
@@ -228,6 +248,7 @@ int compare(struct file_line data, struct input inputs[], int num_arg, int arg_c
     }
     else if (strcmp(inputs[arg_cnt].data_field, "SRC_CITY") == 0)
     {
+        // printf("SRC_CITY:\nInput: %s File: %s\n",inputs[arg_cnt].argument,data.from_airport_city);
         if (strcmp(inputs[arg_cnt].argument,data.from_airport_city) == 0)
         {
             return compare(data,inputs,num_arg,++arg_cnt);
@@ -236,6 +257,7 @@ int compare(struct file_line data, struct input inputs[], int num_arg, int arg_c
     }
     else if (strcmp(inputs[arg_cnt].data_field, "SRC_COUNTRY") == 0)
     {
+        // printf("SRC_COUNTRY:\nInput: %s File: %s\n",inputs[arg_cnt].argument,data.from_airport_country);
         if (strcmp(inputs[arg_cnt].argument,data.from_airport_country) == 0)
         {
             return compare(data,inputs,num_arg,++arg_cnt);
@@ -244,6 +266,7 @@ int compare(struct file_line data, struct input inputs[], int num_arg, int arg_c
     }
     else if (strcmp(inputs[arg_cnt].data_field, "DEST_CITY") == 0)
     {
+        // printf("DEST_CITY:\nInput: %s File: %s\n",inputs[arg_cnt].argument,data.to_airport_city);
         if (strcmp(inputs[arg_cnt].argument,data.to_airport_city) == 0)
         {
             return compare(data,inputs,num_arg,++arg_cnt);
@@ -252,15 +275,12 @@ int compare(struct file_line data, struct input inputs[], int num_arg, int arg_c
     }
     else if (strcmp(inputs[arg_cnt].data_field, "DEST_COUNTRY") == 0)
     {
+        // printf("SRC_COUNTRY:\nInput: %s File: %s\n",inputs[arg_cnt].argument,data.to_airport_country);
         if (strcmp(inputs[arg_cnt].argument,data.from_airport_country) == 0)
         {
             return compare(data,inputs,num_arg,++arg_cnt);
         }
         return 0;
-    }
-    else if (strcmp(inputs[arg_cnt].data_field, "DATA") == 0)
-    {
-        return compare(data,inputs,num_arg,++arg_cnt);
     }
     else
     {
@@ -271,7 +291,11 @@ int compare(struct file_line data, struct input inputs[], int num_arg, int arg_c
 }
 
 /*
-Function: modification on strtok so that empty data fields are read as NULL
+Function:   modification on strtok so that empty data fields are read as NULL.
+Parameters: char * str - pointer to the string to be tokenized.
+            char const * delims - identifies the deliminating character(s).
+Return: char * - pointer to the token element.
+PreConditions: NA
 */
 char * strtok_single (char * str, char const * delims)
 {
