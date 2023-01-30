@@ -13,12 +13,31 @@
 #include <stdlib.h>
 
 void read_arguments();
+void read_file();
+void allocate_data();
+int compare();
 
 struct input {
     char data_field[20];
     char argument[40];
+};
 
-    struct input *next;
+struct file_line {
+    char airline_name[35];
+    char airline_icao_code[4];
+    char airline_country[35];
+
+    char from_airport_name[50];
+    char from_airport_city[35];
+    char from_airport_country[35];
+    char from_airport_icao_code[5];
+    int from_airport_altitude;
+
+    char to_airport_name[50];
+    char to_airport_city[35];
+    char to_airport_country[35];
+    char to_airport_icao_code[5];
+    int to_airport_altitude;
 };
 
 /**
@@ -31,66 +50,242 @@ struct input {
  * @return int 0: No errors; 1: Errors produced.
  *
  */
-int main(int argc, char *argv[])
+int main(int argc, char * argv[])
 {
     // TODO: your code.
-    struct input head;
-    struct input *cur_ptr;
-    cur_ptr = &head;
-    printf("initializing input storage...\n\n");
-    for (int i=0;i<argc-1;++i) {
-        struct input next_input;       // create new pointer
-        cur_ptr->next = &next_input;    // assign new pointers address to cur.next
-        cur_ptr = cur_ptr->next;        // set cur to point to next
-        cur_ptr->next = NULL;
-    }
+    struct input inputs[13];
 
-    printf("head addr: %p\n",&head);
-    printf("h_df addr: %p\n",&(head.data_field));
-    printf("h_ag addr: %p\n",&(head.argument));
-    printf("h_ag addr: %p\n\n",head.next);
+    read_arguments(argc,argv,1,inputs);
 
-    read_arguments(argc,argv,1,&head);
+    // for (int i=0;i < argc-1;++i) {
+    //     printf("field: %s arg: %s\n",inputs[i].data_field,inputs[i].argument);
+    // }
 
-    cur_ptr = &head;
-    int count = 0;
-    while (cur_ptr->next != NULL || count < 5) {
-        printf("field: %s arg: %s\n",cur_ptr->data_field,cur_ptr->argument);
-        ++count;
-        cur_ptr = cur_ptr->next;
-    }
+    FILE * data_file = fopen(inputs[0].argument,"r");
+    if (data_file != NULL) printf("file read ok!\n\n");
+
+    read_file(data_file,inputs,argc-1);
 
     exit(0);
 }
 
 /*
-Function: looks through the arguments specified when running the program
-Parameters: int argc - the number of arguments
+Function:   looks through the arguments specified when running the program.
+Parameters: int argc - the number of arguments.
             char **argv - a pointer to the array of pointers pointing to the
-            specified arguments
+            specified arguments.
+            int arg_index - keeps track of the index in argv to read from.
+            struct input cur_ptr[] - pass through inputs[] to store field
+            and argument parameters.
 return: NA
-PreConditions: must be at least one argument specified at program call
+PreConditions: must be at least one argument specified at program call.
 */
-void read_arguments(int argc, char **argv, int count, struct input *cur_ptr) 
+void read_arguments(int argc, char ** argv, int arg_index, struct input cur_ptr[]) 
 {
     if (argc == 1) {
         printf("no arguments given\n");
         return;
 
-    } else if (count == argc || count > 13) {
-        printf("\nall arguments read: %d arguments\n\n",--count);
+    } else if (arg_index == argc || arg_index > 13) {
+        printf("\nall arguments read: %d arguments\n\n",--arg_index);
         return;
 
     } else {
-        printf("reading fields\n\n");
-        sscanf(*(argv+count),"--%[A-Z]=%[^\t\n]",cur_ptr->data_field,cur_ptr->argument);
+        printf("reading fields\n");
+        int index_os = arg_index - 1;
+        sscanf(*(argv+arg_index),"--%[A-Z_]=%[^\t\n]",cur_ptr[index_os].data_field,cur_ptr[index_os].argument);
 
-        printf("curr addr: %p\n",cur_ptr);
-        printf("c_df addr: %p\n",&(cur_ptr->data_field));
-        printf("c_ag addr: %p\n",&(cur_ptr->argument));
-        printf("c_ag addr: %p\n",cur_ptr->next);
-
-        cur_ptr = cur_ptr->next;
-        return read_arguments(argc,argv,++count,cur_ptr);
+        return read_arguments(argc,argv,++arg_index,cur_ptr);
     }
 }
+
+/*
+Function:   read the input file and compare input arguments with each file row
+Parameters: 
+*/
+void read_file(FILE * stream, struct input inputs[], int num_arg)
+{
+    printf("\nreading file...\n");
+    int count = 1;
+    struct file_line data;
+    char line[1024];
+    fgets(line,1024,stream); // used to bypass header-
+    while (count < 10) 
+    {
+        fgets(line,1024,stream);
+        printf("%s",line);
+
+        char * token = strtok(line,",");
+        allocate_data(token,&data);
+
+        printf("got here!\n");
+
+        if (compare(data,inputs,num_arg,0) == 1) 
+        {
+            printf("- MATHCING LINE -");
+        } 
+        else 
+        {}
+        printf("\n");
+        ++count;
+    }
+}
+
+void allocate_data(char * token, struct file_line * data_ptr)
+{
+    printf("inside allocate_data...\n");
+
+    strcpy(data_ptr->airline_name,token);
+    // printf("name: %s | ",data_ptr->airline_name);
+
+    token = strtok(NULL, ",");
+    strcpy(data_ptr->airline_icao_code,token);
+    // printf("icao: %s | ",data_ptr->airline_icao_code);
+
+    token = strtok(NULL, ",");
+    strcpy(data_ptr->airline_country,token);
+    // printf("ctry: %s | ",data_ptr->airline_country);
+
+    token = strtok(NULL, ",");
+    strcpy(data_ptr->from_airport_name,token);
+    // printf("a_nm: %s\n",data_ptr->from_airport_name);
+
+    token = strtok(NULL, ",");
+    strcpy(data_ptr->from_airport_city,token);
+
+    token = strtok(NULL, ",");
+    strcpy(data_ptr->from_airport_country,token);
+
+    token = strtok(NULL, ",");
+    strcpy(data_ptr->from_airport_icao_code,token);
+
+    token = strtok(NULL, ",");
+    data_ptr->from_airport_altitude = atoi(token);
+
+    token = strtok(NULL, ",");
+    strcpy(data_ptr->to_airport_name,token);
+
+    token = strtok(NULL, ",");
+    strcpy(data_ptr->to_airport_city,token);
+
+    token = strtok(NULL, ",");
+    strcpy(data_ptr->to_airport_country,token);
+
+    token = strtok(NULL, ",");
+    strcpy(data_ptr->to_airport_icao_code,token);
+
+    token = strtok(NULL, ",");
+    data_ptr->to_airport_altitude = atoi(token);
+
+    printf("%s,%s,%s,%s,%s,%s,%s,%d,%s,%s,%s,%s,%d\n\n",
+        data_ptr->airline_name,
+        data_ptr->airline_icao_code,
+        data_ptr->airline_country,
+        data_ptr->from_airport_name,
+        data_ptr->from_airport_city,
+        data_ptr->from_airport_country,
+        data_ptr->from_airport_icao_code,
+        data_ptr->from_airport_altitude,
+        data_ptr->to_airport_name,
+        data_ptr->to_airport_city,
+        data_ptr->to_airport_country,
+        data_ptr->to_airport_icao_code,
+        data_ptr->to_airport_altitude
+        );
+}
+
+/*
+Function:   compares the elements of the input file against the specified input arguments.
+Parameters: struct file_line data - passes through the parsed data from the line segment.
+            struct input inputs[] - passes through the input arguments for comparing with data.
+            int num_arg - identifier for the number of iterations required to compare
+            all arguments passed to the program.
+            int i - counter variable.
+Return: int - returns a boolean value 1 (1==true ; 0==false) when all arguments passed to the
+        program match with the corresponding data value from the parsed line.
+PreConditions:  must have line items and an input argument to compare against. If no arguments
+                are passed to the program there is nothing to compare.
+*/
+int compare(struct file_line data, struct input inputs[], int num_arg, int arg_cnt)
+{
+    printf("comparing %s...\n",inputs[arg_cnt].data_field);
+    if (arg_cnt+1 == num_arg && strcmp(inputs[arg_cnt].data_field, "DATA") == 0)
+    {
+        printf("no arguments!\n");
+        return 0;
+    } 
+    if (arg_cnt == num_arg) 
+    {
+        printf("MATCH!\n");
+        return 1;
+    }
+
+    if (strcmp(inputs[arg_cnt].data_field, "AIRLINE") == 0)
+    {
+        if (strcmp(inputs[arg_cnt].argument, data.airline_icao_code) == 0 || 
+            strcmp(inputs[arg_cnt].argument, data.airline_name) == 0)
+        {
+            return compare(data,inputs,num_arg,++arg_cnt);
+        }
+        return 0;
+    }
+    else if (strcmp(inputs[arg_cnt].data_field, "SRC_CITY") == 0)
+    {
+        if (strcmp(inputs[arg_cnt].argument,data.from_airport_city) == 0)
+        {
+            return compare(data,inputs,num_arg,++arg_cnt);
+        }
+        return 0;
+    }
+    else if (strcmp(inputs[arg_cnt].data_field, "SRC_COUNTRY") == 0)
+    {
+        if (strcmp(inputs[arg_cnt].argument,data.from_airport_country) == 0)
+        {
+            return compare(data,inputs,num_arg,++arg_cnt);
+        }
+        return 0;
+    }
+    else if (strcmp(inputs[arg_cnt].data_field, "DEST_CITY") == 0)
+    {
+        if (strcmp(inputs[arg_cnt].argument,data.to_airport_city) == 0)
+        {
+            return compare(data,inputs,num_arg,++arg_cnt);
+        }
+        return 0;
+    }
+    else if (strcmp(inputs[arg_cnt].data_field, "DEST_COUNTRY") == 0)
+    {
+        if (strcmp(inputs[arg_cnt].argument,data.from_airport_country) == 0)
+        {
+            return compare(data,inputs,num_arg,++arg_cnt);
+        }
+        return 0;
+    }
+    else if (strcmp(inputs[arg_cnt].data_field, "DATA") == 0)
+    {
+        return compare(data,inputs,num_arg,++arg_cnt);
+    }
+    else
+    {
+        printf("not a field!\n"); 
+        return 0;
+    }
+
+}
+
+
+        // sscanf(line,"%s,%s,%s,%s,%s,%s,%s,%d,%s,%s,%s,%s,%d,",
+        //     data[i].airline_name,
+        //     data[i].airline_icao_code,
+        //     data[i].airline_country,
+        //     data[i].from_airport_name,
+        //     data[i].from_airport_city,
+        //     data[i].from_airport_country,
+        //     data[i].from_airport_icao_code,
+        //     data[i].from_airport_altitude,
+        //     data[i].to_airport_name,
+        //     data[i].to_airport_city,
+        //     data[i].to_airport_country,
+        //     data[i].to_airport_icao_code,
+        //     data[i].to_airport_altitude
+        //     ); 
