@@ -16,6 +16,7 @@ void read_arguments();
 void read_file();
 void allocate_data();
 int compare();
+char * strtok_single();
 
 struct input {
     char data_field[20];
@@ -107,13 +108,10 @@ void read_file(FILE * stream, struct input inputs[], int num_arg)
     fgets(line,1024,stream); // used to bypass header-
     while (count < 10) 
     {
+        printf("reading line: %d\n",count);
         fgets(line,1024,stream);
-        printf("%s",line);
-
-        char * token = strtok(line,",");
+        char * token = strtok_single(line,",");
         allocate_data(token,&data);
-
-        printf("got here!\n");
 
         if (compare(data,inputs,num_arg,0) == 1) 
         {
@@ -131,42 +129,50 @@ void allocate_data(char * token, struct file_line * data_ptr)
     printf("inside allocate_data...\n");
 
     strcpy(data_ptr->airline_name,token);
+    printf("check 1\n");
 
-    token = strtok(NULL, ",");
+    token = strtok_single(NULL, ",");
     strcpy(data_ptr->airline_icao_code,token);
 
-    token = strtok(NULL, ",");
+    token = strtok_single(NULL, ",");
     strcpy(data_ptr->airline_country,token);
 
-    token = strtok(NULL, ",");
+    token = strtok_single(NULL, ",");
     strcpy(data_ptr->from_airport_name,token);
 
-    token = strtok(NULL, ",");
+    token = strtok_single(NULL, ",");
     strcpy(data_ptr->from_airport_city,token);
 
-    token = strtok(NULL, ",");
+    token = strtok_single(NULL, ",");
     strcpy(data_ptr->from_airport_country,token);
 
-    token = strtok(NULL, ",");
+    token = strtok_single(NULL, ",");
     strcpy(data_ptr->from_airport_icao_code,token);
+    printf("check 2\n");
 
-    token = strtok(NULL, ",");
+    token = strtok_single(NULL, ",");
     data_ptr->from_airport_altitude = atoi(token);
+    printf("check 3 - integer store\n");
 
-    token = strtok(NULL, ",");
+    token = strtok_single(NULL, ",");
     strcpy(data_ptr->to_airport_name,token);
+    printf("check 4\n");
 
-    token = strtok(NULL, ",");
+    token = strtok_single(NULL, ",");
     strcpy(data_ptr->to_airport_city,token);
+    printf("check 5\n");
 
-    token = strtok(NULL, ",");
+    token = strtok_single(NULL, ",");
     strcpy(data_ptr->to_airport_country,token);
+    printf("check 6\n");
 
-    token = strtok(NULL, ",");
+    token = strtok_single(NULL, ",");
     strcpy(data_ptr->to_airport_icao_code,token);
+    printf("check 7\n");
 
-    token = strtok(NULL, ",");
+    token = strtok_single(NULL, ",");
     data_ptr->to_airport_altitude = atoi(token);
+    printf("check 8\n");
 
     printf("%s,%s,%s,%s,%s,%s,%s,%d,%s,%s,%s,%s,%d\n\n",
         data_ptr->airline_name,
@@ -262,4 +268,31 @@ int compare(struct file_line data, struct input inputs[], int num_arg, int arg_c
         return 0;
     }
 
+}
+
+/*
+Function: modification on strtok so that empty data fields are read as NULL
+*/
+char * strtok_single (char * str, char const * delims)
+{
+  static char  * src = NULL;
+  char  *  p,  * ret = 0;
+
+  if (str != NULL)
+    src = str;
+
+  if (src == NULL)
+    return NULL;
+
+  if ((p = strpbrk (src, delims)) != NULL) {
+    *p  = 0;
+    ret = src;
+    src = ++p;
+
+  } else if (*src) {
+    ret = src;
+    src = NULL;
+  }
+
+  return ret;
 }
