@@ -16,7 +16,8 @@ void read_arguments();
 void read_file();
 void allocate_data();
 int compare();
-char * strtok_single();
+void write_file();
+char * strtok_single(); 
 
 struct input {
     char data_field[20];
@@ -69,6 +70,8 @@ int main(int argc, char * argv[])
 
     read_file(data_file,inputs,argc-1);
 
+
+    fclose(data_file);
     exit(0);
 }
 //------------------------------------------------------
@@ -90,7 +93,7 @@ void read_arguments(int argc, char ** argv, int arg_index, struct input cur_ptr[
         printf("no arguments given\n");
         return;
 
-    } else if (arg_index == argc || arg_index > 13) {
+    } else if (arg_index == argc || arg_index > 13) { // TODO: check logic
         printf("\nall arguments read: %d arguments\n\n",--arg_index);
         return;
 
@@ -129,11 +132,13 @@ void read_file(FILE * stream, struct input inputs[], int num_arg)
         if (compare(data,inputs,num_arg,0) == 1) 
         {
             printf("- MATHCING ITEM - (line %d)\n",count);
+            write_file(data, 1);
         } 
-        else 
+        else
         {
-            // printf("... no match ...\n");
+            write_file(data, 0);
         }
+
         // printf("\n");
         ++count;
     }
@@ -238,7 +243,6 @@ int compare(struct file_line data, struct input inputs[], int num_arg, int arg_c
     // printf("comparing %s...\n",inputs[arg_cnt].data_field);
     if (strcmp(inputs[arg_cnt].data_field, "AIRLINE") == 0)
     {
-        // printf("AIRLINE:\nInput: %s File: %s %s\n",inputs[arg_cnt].argument,data.airline_icao_code,data.airline_name);
         if (strcmp(inputs[arg_cnt].argument, data.airline_icao_code) == 0 || 
             strcmp(inputs[arg_cnt].argument, data.airline_name) == 0)
         {
@@ -248,7 +252,6 @@ int compare(struct file_line data, struct input inputs[], int num_arg, int arg_c
     }
     else if (strcmp(inputs[arg_cnt].data_field, "SRC_CITY") == 0)
     {
-        // printf("SRC_CITY:\nInput: %s File: %s\n",inputs[arg_cnt].argument,data.from_airport_city);
         if (strcmp(inputs[arg_cnt].argument,data.from_airport_city) == 0)
         {
             return compare(data,inputs,num_arg,++arg_cnt);
@@ -257,7 +260,6 @@ int compare(struct file_line data, struct input inputs[], int num_arg, int arg_c
     }
     else if (strcmp(inputs[arg_cnt].data_field, "SRC_COUNTRY") == 0)
     {
-        // printf("SRC_COUNTRY:\nInput: %s File: %s\n",inputs[arg_cnt].argument,data.from_airport_country);
         if (strcmp(inputs[arg_cnt].argument,data.from_airport_country) == 0)
         {
             return compare(data,inputs,num_arg,++arg_cnt);
@@ -266,7 +268,6 @@ int compare(struct file_line data, struct input inputs[], int num_arg, int arg_c
     }
     else if (strcmp(inputs[arg_cnt].data_field, "DEST_CITY") == 0)
     {
-        // printf("DEST_CITY:\nInput: %s File: %s\n",inputs[arg_cnt].argument,data.to_airport_city);
         if (strcmp(inputs[arg_cnt].argument,data.to_airport_city) == 0)
         {
             return compare(data,inputs,num_arg,++arg_cnt);
@@ -275,7 +276,6 @@ int compare(struct file_line data, struct input inputs[], int num_arg, int arg_c
     }
     else if (strcmp(inputs[arg_cnt].data_field, "DEST_COUNTRY") == 0)
     {
-        // printf("SRC_COUNTRY:\nInput: %s File: %s\n",inputs[arg_cnt].argument,data.to_airport_country);
         if (strcmp(inputs[arg_cnt].argument,data.from_airport_country) == 0)
         {
             return compare(data,inputs,num_arg,++arg_cnt);
@@ -288,6 +288,35 @@ int compare(struct file_line data, struct input inputs[], int num_arg, int arg_c
         return 0;
     }
 
+}
+
+/*
+Function: create a new output text file with the desired output
+*/
+void write_file(struct file_line data, int bool)
+{
+    FILE * result = fopen("results.txt","w");
+
+    if (bool == 1)
+    {
+        char from_city[] = data.from_airport_city;
+        char from_country[] = data.from_airport_country;
+        char to_city[] = data.to_airport_city;
+        char to_country[] = data.to_airport_country;
+
+        char print_line[100] = "FLIGHTS FROM ";
+        
+        strcat(print_line,from_city);
+    }
+    else
+    {
+        fputs("NO RESULTS FOUND.\n",result);
+    }
+
+    
+
+
+    fclose(result);
 }
 
 /*
