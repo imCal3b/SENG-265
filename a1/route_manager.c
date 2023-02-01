@@ -144,12 +144,15 @@ void read_file(FILE * stream, struct input inputs[], int num_arg)
         if (compare(data,inputs,num_arg,0) == 1) 
         {
             printf("- MATHCING ITEM - (line %d)\n",count);
+
+            if (match == 0) output_write_header(data,result_file,option);
+
             write_file(data,inputs,num_arg,result_file,1,option);
             ++match;
         } 
         ++count;
     }
-    if (match == 0) write_file(data,inputs,num_arg,result_file,0,option);
+    // if (match == 0) write_file(data,inputs,num_arg,result_file,0,option);
 }
 
 /*
@@ -336,12 +339,7 @@ void write_file(struct file_line data, struct input inputs[], int num_arg, FILE 
         return;
     }
 
-    if (access("results.txt",0) != 0)
-    {
-        printf("make header...\n");
-        output_write_header(data,result,option);
-    }
-
+    result = fopen("results.txt","a");
     output_write_contents(data,result,option);
     fclose(result);
 }
@@ -354,10 +352,10 @@ Parameters: struct file_line data - pass through the data fields to be used in h
 Return: NA
 PreConditions: Runs when the first matching case is encountered. Otherwise does not run.
 */
-void output_write_header(struct file_line data, FILE * result, int option)
+void output_write_header(struct file_line data, FILE * result, int option) //STOPPING PROGRAM FROM CONTINUING
 {
-    printf("in output_write_header()...\n");
-    result = fopen("results.txt","w");
+    printf("writing header...\n");
+    result = fopen("results.txt","a");
     char print_hdr[150];
     switch (option)
     {      
@@ -381,7 +379,7 @@ void output_write_header(struct file_line data, FILE * result, int option)
             fputs(print_hdr,result);
             break;
 
-        case 110110:
+        case 111100:
             //SRC_COUNTRY DEST_CITY DEST_COUNTRY
             snprintf(print_hdr,sizeof(print_hdr),"FLIGHTS FROM %s TO %s, %s:\n",
                 data.from_airport_country,
@@ -402,7 +400,7 @@ void output_write_header(struct file_line data, FILE * result, int option)
             fputs(print_hdr,result);
             break;
         
-        case 111010:
+        case 110110:
             //SRC_CITY SRC_COUNTRY DEST_COUNTRY
             snprintf(print_hdr,sizeof(print_hdr),"FLIGHTS FROM %s, %s TO %s:\n",
                 data.from_airport_city,
@@ -413,6 +411,7 @@ void output_write_header(struct file_line data, FILE * result, int option)
             break;
         
         default:
+            printf("in default...\n");
             // NONE-INVALID PARAMETER INPUT
             break;
     }
@@ -428,25 +427,27 @@ Parameters: struct file_line data - pass through the data fields to be in line c
 Return: NA
 PreConditions: Runs when a matching case is found.
 */
-void output_write_contents(struct file_line data, FILE * result, int option)
+void output_write_contents(struct file_line data, FILE * result, int option) //STOPPING PROGRAM FROM CONTINUING
 {
-    result = fopen("results.txt","w");
+    printf("writing contents...\n");
+    result = fopen("results.txt","a");
     char print_ctnt[150];
 
     if (option == 100101 || option == 110001)
     {
         //AIRLINE SRC_COUNTRY or DEST_COUNTRY
-            snprintf(print_ctnt,sizeof(print_ctnt),"FROM: %s, %s, %s TO: %s (%s), %s\n",
-                data.from_airport_icao_code,
-                data.from_airport_city,
-                data.from_airport_country,
-                data.to_airport_name,
-                data.to_airport_icao_code,
-                data.to_airport_country);
-
-            fputs(print_ctnt,result);
+        snprintf(print_ctnt,sizeof(print_ctnt),"FROM: %s, %s, %s TO: %s (%s), %s\n",
+            data.from_airport_icao_code,
+            data.from_airport_city,
+            data.from_airport_country,
+            data.to_airport_name,
+            data.to_airport_icao_code,
+            data.to_airport_country);
+    
+        printf("content: %s",print_ctnt);
+        fputs(print_ctnt,result);
     }
-    else if (option == 110110)
+    else if (option == 111100)
     {
         //SRC_COUNTRY DEST_CITY DEST_COUNTRY
         snprintf(print_ctnt,sizeof(print_ctnt),"AIRLINE: %s (%s) ORIGIN: %s (%s), %s\n",
@@ -456,10 +457,12 @@ void output_write_contents(struct file_line data, FILE * result, int option)
             data.from_airport_icao_code,
             data.from_airport_country);
 
+        printf("content: %s",print_ctnt);
         fputs(print_ctnt,result);
     }
-    else if (option == 111010)
+    else if (option == 110110)
     {
+        //SRC_CITY SRC_COUNTRY DEST_COUNTRY
         snprintf(print_ctnt,sizeof(print_ctnt),"AIRLINE: %s (%s) DESTINATION: %s (%s), %s\n",
             data.airline_name,
             data.airline_icao_code,
@@ -467,19 +470,22 @@ void output_write_contents(struct file_line data, FILE * result, int option)
             data.to_airport_icao_code,
             data.to_airport_country);
 
+        printf("content: %s",print_ctnt);
         fputs(print_ctnt,result);
     }
     else if (option == 111110)
     {
+        //SRC_CITY SRC_COUNTRY DEST_CITY DEST_COUNTRY
         snprintf(print_ctnt,sizeof(print_ctnt),"AIRLINE: %s (%s) ROUTE: %s-%s\n",
             data.airline_name,
             data.airline_icao_code,
             data.from_airport_icao_code,
             data.to_airport_icao_code);
 
+        printf("content: %s",print_ctnt);
         fputs(print_ctnt,result);
     }
-    else {/*INVALID OPTION*/}
+    else {/*INVALID OPTION*/ printf("in default");}
 
     
     fclose(result);
