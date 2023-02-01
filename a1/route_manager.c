@@ -11,12 +11,16 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 void read_arguments();
 void read_file();
 void allocate_data();
 int compare();
 void write_file();
+void output_write_header();
+void output_write_contents();
+int argument_output_specifier();
 char * strtok_single(); 
 
 struct input {
@@ -58,20 +62,18 @@ int main(int argc, char * argv[])
     printf("\n---------------\n ROUTE MANAGER\n---------------\n\n");
 
     struct input inputs[13];
-
     read_arguments(argc,argv,1,inputs);
 
-    for (int i=0;i < argc-1;i++) 
+    for (int i=0;i<argc-1;i++)
     {
-        printf("field: %s | arg: %s\n",inputs[i].data_field,inputs[i].argument);
+        printf("Field: %s. | Arg: %s.\n",inputs[i].data_field,inputs[i].argument);
     }
 
     FILE * data_file = fopen(inputs[0].argument,"r");
-
     read_file(data_file,inputs,argc-1);
 
-
     fclose(data_file);
+    printf("\n----------\n COMPLETE\n----------\n");
     exit(0);
 }
 //------------------------------------------------------
@@ -118,30 +120,36 @@ PreConditions: must have a file to input into the function.
 void read_file(FILE * stream, struct input inputs[], int num_arg)
 {
     printf("\nreading file...\n");
-    int count = 2;
+
     struct file_line data;
+    FILE * result_file;
+
+    if (access("results.txt",0) == 0) {
+        printf("old file removed...\n");
+        remove("results.txt");
+    } 
+    
     char line[1024];
+    int match = 0, count = 2;
+    
+    int option = argument_output_specifier(inputs,num_arg);
+    printf("option: %d\n",option);
+
     fgets(line,1024,stream); // used to bypass header-
     while (fgets(line,1024,stream)) 
     {
-        // printf("reading line: %d\n",count++);
-        // fgets(line,1024,stream);
         char * token = strtok_single(line,",");
         allocate_data(token,&data);
 
         if (compare(data,inputs,num_arg,0) == 1) 
         {
             printf("- MATHCING ITEM - (line %d)\n",count);
-            write_file(data, 1);
+            write_file(data,inputs,num_arg,result_file,1,option);
+            ++match;
         } 
-        else
-        {
-            write_file(data, 0);
-        }
-
-        // printf("\n");
         ++count;
     }
+    if (match == 0) write_file(data,inputs,num_arg,result_file,0,option);
 }
 
 /*
@@ -246,6 +254,10 @@ int compare(struct file_line data, struct input inputs[], int num_arg, int arg_c
         if (strcmp(inputs[arg_cnt].argument, data.airline_icao_code) == 0 || 
             strcmp(inputs[arg_cnt].argument, data.airline_name) == 0)
         {
+        //     printf("input: %s data: %s %s\n",
+        // inputs[arg_cnt].argument,
+        // data.airline_icao_code,
+        // data.airline_name);
             return compare(data,inputs,num_arg,++arg_cnt);
         }
         return 0;
@@ -254,6 +266,9 @@ int compare(struct file_line data, struct input inputs[], int num_arg, int arg_c
     {
         if (strcmp(inputs[arg_cnt].argument,data.from_airport_city) == 0)
         {
+        //     printf("input: %s data: %s\n",
+        // inputs[arg_cnt].argument,
+        // data.from_airport_city);
             return compare(data,inputs,num_arg,++arg_cnt);
         }
         return 0;
@@ -262,6 +277,9 @@ int compare(struct file_line data, struct input inputs[], int num_arg, int arg_c
     {
         if (strcmp(inputs[arg_cnt].argument,data.from_airport_country) == 0)
         {
+        //     printf("input: %s data: %s\n",
+        // inputs[arg_cnt].argument,
+        // data.from_airport_country);
             return compare(data,inputs,num_arg,++arg_cnt);
         }
         return 0;
@@ -270,14 +288,20 @@ int compare(struct file_line data, struct input inputs[], int num_arg, int arg_c
     {
         if (strcmp(inputs[arg_cnt].argument,data.to_airport_city) == 0)
         {
+        //     printf("input: %s data: %s\n",
+        // inputs[arg_cnt].argument,
+        // data.to_airport_city);
             return compare(data,inputs,num_arg,++arg_cnt);
         }
         return 0;
     }
     else if (strcmp(inputs[arg_cnt].data_field, "DEST_COUNTRY") == 0)
     {
-        if (strcmp(inputs[arg_cnt].argument,data.from_airport_country) == 0)
+        if (strcmp(inputs[arg_cnt].argument,data.to_airport_country) == 0)
         {
+        //     printf("input: %s data: %s\n",
+        // inputs[arg_cnt].argument,
+        // data.to_airport_country);
             return compare(data,inputs,num_arg,++arg_cnt);
         }
         return 0;
@@ -291,32 +315,197 @@ int compare(struct file_line data, struct input inputs[], int num_arg, int arg_c
 }
 
 /*
-Function: create a new output text file with the desired output
+Function:   create an output text file with the desired output.
+Parameters: struct file_line data - passing through the parsed data to be used for
+            printing outputs to the output file.
+            struct input inputs[] - the input arguments to be passed through to output_write_header().
+            int num_arg - the number of arguments. Used in output_write_header().
+            FILE * result - a pointer to the output file.
+            int bool - a value used to define a matching state (val=0), or, no match found state (val=1).
+Return: NA
+PreConditions: NA
 */
-void write_file(struct file_line data, int bool)
+void write_file(struct file_line data, struct input inputs[], int num_arg, FILE * result, int bool,int option)
 {
-    FILE * result = fopen("results.txt","w");
-
-    if (bool == 1)
+    printf("writing output...\n");
+    if (bool == 0)
     {
-        char from_city[] = data.from_airport_city;
-        char from_country[] = data.from_airport_country;
-        char to_city[] = data.to_airport_city;
-        char to_country[] = data.to_airport_country;
-
-        char print_line[100] = "FLIGHTS FROM ";
-        
-        strcat(print_line,from_city);
-    }
-    else
-    {
+        result = fopen("results.txt","w");
         fputs("NO RESULTS FOUND.\n",result);
+        fclose(result);
+        return;
     }
+
+    if (access("results.txt",0) != 0)
+    {
+        printf("make header...\n");
+        output_write_header(data,result,option);
+    }
+
+    output_write_contents(data,result,option);
+    fclose(result);
+}
+
+/*
+Function:   writes the header for the results.txt file based on the arguments specified.
+Parameters: struct file_line data - pass through the data fields to be used in header.
+            FILE * result - pointer to the output file so we can access and write to it.
+            int option - identifier for output based on the arguments given
+Return: NA
+PreConditions: Runs when the first matching case is encountered. Otherwise does not run.
+*/
+void output_write_header(struct file_line data, FILE * result, int option)
+{
+    printf("in output_write_header()...\n");
+    result = fopen("results.txt","w");
+    char print_hdr[150];
+    switch (option)
+    {      
+        case 100101:
+            //AIRLINE SRC_COUNTRY
+            snprintf(print_hdr,sizeof(print_hdr),"FLIGHTS FROM %s BY %s (%s):\n",
+                data.from_airport_country,
+                data.airline_name,
+                data.airline_icao_code);
+
+            fputs(print_hdr,result);
+            break;
+
+        case 110001:
+            //AIRLINE DEST_COUNTRY
+            snprintf(print_hdr,sizeof(print_hdr),"FLIGHTS TO %s BY %s (%s):\n",
+                data.to_airport_country,
+                data.airline_name,
+                data.airline_icao_code);
+
+            fputs(print_hdr,result);
+            break;
+
+        case 110110:
+            //SRC_COUNTRY DEST_CITY DEST_COUNTRY
+            snprintf(print_hdr,sizeof(print_hdr),"FLIGHTS FROM %s TO %s, %s:\n",
+                data.from_airport_country,
+                data.to_airport_city,
+                data.to_airport_country);
+
+            fputs(print_hdr,result);
+            break;
+
+        case 111110:
+            //SRC_CITY SRC_COUNTRY DEST_CITY DEST_COUNTRY
+            snprintf(print_hdr,sizeof(print_hdr),"FLIGHTS FROM %s, %s TO %s, %s:\n",
+                data.from_airport_city,
+                data.from_airport_country,
+                data.to_airport_city,
+                data.to_airport_country);
+
+            fputs(print_hdr,result);
+            break;
+        
+        case 111010:
+            //SRC_CITY SRC_COUNTRY DEST_COUNTRY
+            snprintf(print_hdr,sizeof(print_hdr),"FLIGHTS FROM %s, %s TO %s:\n",
+                data.from_airport_city,
+                data.from_airport_country,
+                data.to_airport_country);
+
+            fputs(print_hdr,result);
+            break;
+        
+        default:
+            // NONE-INVALID PARAMETER INPUT
+            break;
+    }
+    
+    fclose(result);
+}
+
+/*
+Function: writes the output line data in results.txt when a matching item is found.
+Parameters: struct file_line data - pass through the data fields to be in line contents.
+            FILE * result - pointer to the output file so we can access and write to it.
+            int option - identifier for output based on the arguments given.
+Return: NA
+PreConditions: Runs when a matching case is found.
+*/
+void output_write_contents(struct file_line data, FILE * result, int option)
+{
+    result = fopen("results.txt","w");
+    char print_ctnt[150];
+
+    if (option == 100101 || option == 110001)
+    {
+        //AIRLINE SRC_COUNTRY or DEST_COUNTRY
+            snprintf(print_ctnt,sizeof(print_ctnt),"FROM: %s, %s, %s TO: %s (%s), %s\n",
+                data.from_airport_icao_code,
+                data.from_airport_city,
+                data.from_airport_country,
+                data.to_airport_name,
+                data.to_airport_icao_code,
+                data.to_airport_country);
+
+            fputs(print_ctnt,result);
+    }
+    else if (option == 110110)
+    {
+        //SRC_COUNTRY DEST_CITY DEST_COUNTRY
+        snprintf(print_ctnt,sizeof(print_ctnt),"AIRLINE: %s (%s) ORIGIN: %s (%s), %s\n",
+            data.airline_name,
+            data.airline_icao_code,
+            data.from_airport_name,
+            data.from_airport_icao_code,
+            data.from_airport_country);
+
+        fputs(print_ctnt,result);
+    }
+    else if (option == 111010)
+    {
+        snprintf(print_ctnt,sizeof(print_ctnt),"AIRLINE: %s (%s) DESTINATION: %s (%s), %s\n",
+            data.airline_name,
+            data.airline_icao_code,
+            data.to_airport_name,
+            data.to_airport_icao_code,
+            data.to_airport_country);
+
+        fputs(print_ctnt,result);
+    }
+    else if (option == 111110)
+    {
+        snprintf(print_ctnt,sizeof(print_ctnt),"AIRLINE: %s (%s) ROUTE: %s-%s\n",
+            data.airline_name,
+            data.airline_icao_code,
+            data.from_airport_icao_code,
+            data.to_airport_icao_code);
+
+        fputs(print_ctnt,result);
+    }
+    else {/*INVALID OPTION*/}
 
     
-
-
     fclose(result);
+}
+
+/*
+Function:   outputs a unique integer based on the arguments given at program call.
+Parameters: struct input inputs[] - input arguments.
+            int num_arg - the number of arguments given.
+Return: int - the unique identifier for type of output required.
+PreConditions: arguments were given at program call.
+*/
+int argument_output_specifier(struct input inputs[], int num_arg)
+{
+    int option = 100000;
+    for (int i=0;i<num_arg;++i)
+    {
+        if (strcmp(inputs[i].data_field,"AIRLINE") == 0) {option += 1;}
+        else if (strcmp(inputs[i].data_field,"SRC_CITY") == 0) {option += 10;}
+        else if (strcmp(inputs[i].data_field,"SRC_COUNTRY") == 0) {option += 100;}
+        else if (strcmp(inputs[i].data_field,"DEST_CITY") == 0) {option += 1000;}
+        else if (strcmp(inputs[i].data_field,"DEST_COUNTRY") == 0) {option += 10000;}
+        else{}
+    }
+
+    return option;
 }
 
 /*
@@ -326,26 +515,26 @@ Parameters: char * str - pointer to the string to be tokenized.
 Return: char * - pointer to the token element.
 PreConditions: NA
 */
-char * strtok_single (char * str, char const * delims)
+char * strtok_single (char * line, char const * delims)
 {
-  static char  * src = NULL;
-  char  *  p,  * ret = 0;
+  static char * src = NULL;
+  char * p, * ret_token = 0;
 
-  if (str != NULL)
-    src = str;
+  if (line != NULL)
+    src = line;
 
   if (src == NULL)
     return NULL;
 
   if ((p = strpbrk (src, delims)) != NULL) {
     *p  = 0;
-    ret = src;
+    ret_token = src;
     src = ++p;
 
   } else if (*src) {
-    ret = src;
+    ret_token = src;
     src = NULL;
   }
 
-  return ret;
+  return ret_token;
 }
