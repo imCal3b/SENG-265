@@ -133,6 +133,8 @@ void read_file(FILE * stream, struct input inputs[], int num_arg)
     int match = 0, count = 2;
     
     int option = argument_output_specifier(inputs,num_arg);
+    if (option == 100000) return; // no arguments specified at program call
+
     printf("option: %d\n",option);
 
     fgets(line,1024,stream); // used to bypass header-
@@ -147,12 +149,12 @@ void read_file(FILE * stream, struct input inputs[], int num_arg)
 
             if (match == 0) output_write_header(data,result_file,option);
 
-            write_file(data,inputs,num_arg,result_file,1,option);
+            write_file(data,result_file,1,option);
             ++match;
         } 
         ++count;
     }
-    if (match == 0) write_file(data,inputs,num_arg,result_file,0,option);
+    if (match == 0) write_file(data,result_file,0,option);
 }
 
 /*
@@ -318,17 +320,15 @@ int compare(struct file_line data, struct input inputs[], int num_arg, int arg_c
 }
 
 /*
-Function:   create an output text file with the desired output.
+Function:   write the results of the search to the output file.
 Parameters: struct file_line data - passing through the parsed data to be used for
             printing outputs to the output file.
-            struct input inputs[] - the input arguments to be passed through to output_write_header().
-            int num_arg - the number of arguments. Used in output_write_header().
             FILE * result - a pointer to the output file.
             int bool - a value used to define a matching state (val=0), or, no match found state (val=1).
 Return: NA
 PreConditions: NA
 */
-void write_file(struct file_line data, struct input inputs[], int num_arg, FILE * result, int bool,int option)
+void write_file(struct file_line data, FILE * result, int bool,int option)
 {
     printf("writing output...\n");
     if (bool == 0)
