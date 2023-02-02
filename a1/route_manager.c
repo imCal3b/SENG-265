@@ -137,15 +137,14 @@ void read_file(FILE * stream, struct input inputs[], int num_arg)
 
     printf("option: %d\n",option);
 
-    fgets(line,1024,stream); // used to bypass header-
+    fgets(line,1024,stream); // bypass header line in .csv file
     while (fgets(line,1024,stream)) 
     {
-        char * token = strtok_single(line,",");
-        allocate_data(token,&data);
+        allocate_data(line,&data);
 
         if (compare(data,inputs,num_arg,0) == 1) 
         {
-            printf("- MATHCING ITEM - (line %d)\n",count);
+            printf("\n- MATHCING ITEM - (line %d)\n",count);
 
             if (match == 0) output_write_header(data,result_file,option);
 
@@ -166,10 +165,11 @@ Parameters: char * token - pointer to the first token value from strtok_single()
 Return: NA
 PreConditions: NA
 */
-void allocate_data(char * token, struct file_line * data_ptr)
+void allocate_data(char line[], struct file_line * data_ptr)
 {
     // printf("inside allocate_data...\n");
 
+    char * token = strtok_single(line,",");
     strncpy(data_ptr->airline_name,token,sizeof(data_ptr->airline_name));
 
     token = strtok_single(NULL, ",");
@@ -352,7 +352,7 @@ Parameters: struct file_line data - pass through the data fields to be used in h
 Return: NA
 PreConditions: Runs when the first matching case is encountered. Otherwise does not run.
 */
-void output_write_header(struct file_line data, FILE * result, int option) //STOPPING PROGRAM FROM CONTINUING
+void output_write_header(struct file_line data, FILE * result, int option)
 {
     printf("writing header...\n");
     result = fopen("results.txt","a");
@@ -427,7 +427,7 @@ Parameters: struct file_line data - pass through the data fields to be in line c
 Return: NA
 PreConditions: Runs when a matching case is found.
 */
-void output_write_contents(struct file_line data, FILE * result, int option) //STOPPING PROGRAM FROM CONTINUING
+void output_write_contents(struct file_line data, FILE * result, int option)
 {
     printf("writing contents...\n");
     result = fopen("results.txt","a");
