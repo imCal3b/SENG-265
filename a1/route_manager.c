@@ -152,7 +152,7 @@ void read_file(FILE * stream, struct input inputs[], int num_arg)
         } 
         ++count;
     }
-    // if (match == 0) write_file(data,inputs,num_arg,result_file,0,option);
+    if (match == 0) write_file(data,inputs,num_arg,result_file,0,option);
 }
 
 /*
@@ -168,40 +168,40 @@ void allocate_data(char * token, struct file_line * data_ptr)
 {
     // printf("inside allocate_data...\n");
 
-    strcpy(data_ptr->airline_name,token);
+    strncpy(data_ptr->airline_name,token,sizeof(data_ptr->airline_name));
 
     token = strtok_single(NULL, ",");
-    strcpy(data_ptr->airline_icao_code,token);
+    strncpy(data_ptr->airline_icao_code,token,sizeof(data_ptr->airline_icao_code));
 
     token = strtok_single(NULL, ",");
-    strcpy(data_ptr->airline_country,token);
+    strncpy(data_ptr->airline_country,token,sizeof(data_ptr->airline_country));
 
     token = strtok_single(NULL, ",");
-    strcpy(data_ptr->from_airport_name,token);
+    strncpy(data_ptr->from_airport_name,token,sizeof(data_ptr->from_airport_name));
 
     token = strtok_single(NULL, ",");
-    strcpy(data_ptr->from_airport_city,token);
+    strncpy(data_ptr->from_airport_city,token,sizeof(data_ptr->from_airport_city));
 
     token = strtok_single(NULL, ",");
-    strcpy(data_ptr->from_airport_country,token);
+    strncpy(data_ptr->from_airport_country,token,sizeof(data_ptr->from_airport_country));
 
     token = strtok_single(NULL, ",");
-    strcpy(data_ptr->from_airport_icao_code,token);
+    strncpy(data_ptr->from_airport_icao_code,token,sizeof(data_ptr->from_airport_icao_code));
 
     token = strtok_single(NULL, ",");
     data_ptr->from_airport_altitude = atoi(token);
 
     token = strtok_single(NULL, ",");
-    strcpy(data_ptr->to_airport_name,token);
+    strncpy(data_ptr->to_airport_name,token,sizeof(data_ptr->to_airport_name));
 
     token = strtok_single(NULL, ",");
-    strcpy(data_ptr->to_airport_city,token);
+    strncpy(data_ptr->to_airport_city,token,sizeof(data_ptr->to_airport_city));
 
     token = strtok_single(NULL, ",");
-    strcpy(data_ptr->to_airport_country,token);
+    strncpy(data_ptr->to_airport_country,token,sizeof(data_ptr->to_airport_country));
 
     token = strtok_single(NULL, ",");
-    strcpy(data_ptr->to_airport_icao_code,token);
+    strncpy(data_ptr->to_airport_icao_code,token,sizeof(data_ptr->to_airport_icao_code));
 
     token = strtok_single(NULL, ",");
     data_ptr->to_airport_altitude = atoi(token);
@@ -442,7 +442,7 @@ void output_write_contents(struct file_line data, FILE * result, int option) //S
             data.from_airport_country,
             data.to_airport_name,
             data.to_airport_icao_code,
-            data.to_airport_country);
+            data.to_airport_city);
     
         printf("content: %s",print_ctnt);
         fputs(print_ctnt,result);
@@ -455,7 +455,7 @@ void output_write_contents(struct file_line data, FILE * result, int option) //S
             data.airline_icao_code,
             data.from_airport_name,
             data.from_airport_icao_code,
-            data.from_airport_country);
+            data.from_airport_city);
 
         printf("content: %s",print_ctnt);
         fputs(print_ctnt,result);
