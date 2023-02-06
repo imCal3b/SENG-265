@@ -64,11 +64,6 @@ int main(int argc, char * argv[])
     struct input inputs[13];
     read_arguments(argc,argv,1,inputs);
 
-    for (int i=0;i<argc-1;i++)
-    {
-        printf("Field: %s. | Arg: %s.\n",inputs[i].data_field,inputs[i].argument);
-    }
-
     FILE * data_file = fopen(inputs[0].argument,"r");
     read_file(data_file,inputs,argc-1);
 
@@ -92,15 +87,13 @@ PreConditions: must be at least one argument specified at program call.
 void read_arguments(int argc, char ** argv, int arg_index, struct input cur_ptr[]) 
 {
     if (argc == 1) {
-        printf("no arguments given\n");
+        // no arguments given
         return;
 
     } else if (arg_index == argc || arg_index > 13) { // TODO: check logic
-        printf("\nall arguments read: %d arguments\n\n",--arg_index);
         return;
 
     } else {
-        printf("reading fields\n");
         int index_os = arg_index - 1;
         sscanf(*(argv+arg_index),"--%[A-Z_]=%[^\t\n]",cur_ptr[index_os].data_field,cur_ptr[index_os].argument);
 
@@ -119,40 +112,34 @@ PreConditions: must have a file to input into the function.
 */
 void read_file(FILE * stream, struct input inputs[], int num_arg)
 {
-    printf("\nreading file...\n");
-
     struct file_line data;
     FILE * result_file;
 
-    if (access("results.txt",0) == 0) {
-        printf("old file removed...\n");
-        remove("results.txt");
-    } 
+    if (access("results.txt",0) == 0) remove("results.txt"); //CHECK: library associated with access() function
     
     char line[1024];
-    int match = 0, count = 2;
+    int match = 0;
     
     int option = argument_output_specifier(inputs,num_arg);
     if (option == 100000) return; // no arguments specified at program call
 
-    printf("option: %d\n",option);
-
     fgets(line,1024,stream); // bypass header line in .csv file
     while (fgets(line,1024,stream)) 
     {
+        // parse line item into respective fields
         allocate_data(line,&data);
 
+        // look for line item with fields matching input arguments
         if (compare(data,inputs,num_arg,0) == 1) 
         {
-            printf("\n- MATHCING ITEM - (line %d)\n",count);
-
+            // if first match: print header line
             if (match == 0) output_write_header(data,result_file,option);
 
             write_file(data,result_file,1,option);
             ++match;
         } 
-        ++count;
     }
+    // if no matches found
     if (match == 0) write_file(data,result_file,0,option);
 }
 
@@ -167,8 +154,6 @@ PreConditions: NA
 */
 void allocate_data(char line[], struct file_line * data_ptr)
 {
-    // printf("inside allocate_data...\n");
-
     char * token = strtok_single(line,",");
     strncpy(data_ptr->airline_name,token,sizeof(data_ptr->airline_name));
 
@@ -207,22 +192,6 @@ void allocate_data(char line[], struct file_line * data_ptr)
 
     token = strtok_single(NULL, ",");
     data_ptr->to_airport_altitude = atoi(token);
-
-    // printf("%s,%s,%s,%s,%s,%s,%s,%d,%s,%s,%s,%s,%d\n\n",
-    //     data_ptr->airline_name,
-    //     data_ptr->airline_icao_code,
-    //     data_ptr->airline_country,
-    //     data_ptr->from_airport_name,
-    //     data_ptr->from_airport_city,
-    //     data_ptr->from_airport_country,
-    //     data_ptr->from_airport_icao_code,
-    //     data_ptr->from_airport_altitude,
-    //     data_ptr->to_airport_name,
-    //     data_ptr->to_airport_city,
-    //     data_ptr->to_airport_country,
-    //     data_ptr->to_airport_icao_code,
-    //     data_ptr->to_airport_altitude
-    //     );
 }
 
 /*
@@ -239,30 +208,21 @@ PreConditions:  must have line items and an input argument to compare against. I
 */
 int compare(struct file_line data, struct input inputs[], int num_arg, int arg_cnt)
 {
+    // bypass the 'DATA' argument
     if (strcmp(inputs[arg_cnt].data_field, "DATA") == 0) return compare(data,inputs,num_arg,++arg_cnt);
     
-    // printf("arg_count: %d\n",arg_cnt);
-    if (arg_cnt+1 == num_arg && strcmp(inputs[arg_cnt].data_field, "DATA") == 0)
-    {
-        printf("no arguments!\n");
-        return 0;
-    } 
-    if (arg_cnt == num_arg) 
-    {
-        // printf("MATCH!\n");
-        return 1;
-    }
+    // no arguments given
+    if (arg_cnt+1 == num_arg && strcmp(inputs[arg_cnt].data_field, "DATA") == 0) return 0;
+
+    // base case: all arguments read
+    if (arg_cnt == num_arg) return 1;
     
-    // printf("comparing %s...\n",inputs[arg_cnt].data_field);
+    // check which data fields were input at program call
     if (strcmp(inputs[arg_cnt].data_field, "AIRLINE") == 0)
     {
         if (strcmp(inputs[arg_cnt].argument, data.airline_icao_code) == 0 || 
             strcmp(inputs[arg_cnt].argument, data.airline_name) == 0)
         {
-        //     printf("input: %s data: %s %s\n",
-        // inputs[arg_cnt].argument,
-        // data.airline_icao_code,
-        // data.airline_name);
             return compare(data,inputs,num_arg,++arg_cnt);
         }
         return 0;
@@ -271,9 +231,6 @@ int compare(struct file_line data, struct input inputs[], int num_arg, int arg_c
     {
         if (strcmp(inputs[arg_cnt].argument,data.from_airport_city) == 0)
         {
-        //     printf("input: %s data: %s\n",
-        // inputs[arg_cnt].argument,
-        // data.from_airport_city);
             return compare(data,inputs,num_arg,++arg_cnt);
         }
         return 0;
@@ -282,9 +239,6 @@ int compare(struct file_line data, struct input inputs[], int num_arg, int arg_c
     {
         if (strcmp(inputs[arg_cnt].argument,data.from_airport_country) == 0)
         {
-        //     printf("input: %s data: %s\n",
-        // inputs[arg_cnt].argument,
-        // data.from_airport_country);
             return compare(data,inputs,num_arg,++arg_cnt);
         }
         return 0;
@@ -293,9 +247,6 @@ int compare(struct file_line data, struct input inputs[], int num_arg, int arg_c
     {
         if (strcmp(inputs[arg_cnt].argument,data.to_airport_city) == 0)
         {
-        //     printf("input: %s data: %s\n",
-        // inputs[arg_cnt].argument,
-        // data.to_airport_city);
             return compare(data,inputs,num_arg,++arg_cnt);
         }
         return 0;
@@ -304,16 +255,13 @@ int compare(struct file_line data, struct input inputs[], int num_arg, int arg_c
     {
         if (strcmp(inputs[arg_cnt].argument,data.to_airport_country) == 0)
         {
-        //     printf("input: %s data: %s\n",
-        // inputs[arg_cnt].argument,
-        // data.to_airport_country);
             return compare(data,inputs,num_arg,++arg_cnt);
         }
         return 0;
     }
     else
     {
-        printf("not a field!\n"); 
+        // NOT AN ALLOWED FIELD
         return 0;
     }
 
@@ -330,9 +278,9 @@ PreConditions: NA
 */
 void write_file(struct file_line data, FILE * result, int bool,int option)
 {
-    printf("writing output...\n");
     if (bool == 0)
     {
+        // no matches found
         result = fopen("results.txt","w");
         fputs("NO RESULTS FOUND.\n",result);
         fclose(result);
@@ -354,7 +302,6 @@ PreConditions: Runs when the first matching case is encountered. Otherwise does 
 */
 void output_write_header(struct file_line data, FILE * result, int option)
 {
-    printf("writing header...\n");
     result = fopen("results.txt","a");
     char print_hdr[250];
     switch (option)
@@ -411,7 +358,6 @@ void output_write_header(struct file_line data, FILE * result, int option)
             break;
         
         default:
-            printf("in default...\n");
             // NONE-INVALID PARAMETER INPUT
             break;
     }
@@ -429,7 +375,6 @@ PreConditions: Runs when a matching case is found.
 */
 void output_write_contents(struct file_line data, FILE * result, int option)
 {
-    printf("writing contents...\n");
     result = fopen("results.txt","a");
     char print_ctnt[250];
 
@@ -444,7 +389,6 @@ void output_write_contents(struct file_line data, FILE * result, int option)
             data.to_airport_icao_code,
             data.to_airport_city);
     
-        printf("content: %s",print_ctnt);
         fputs(print_ctnt,result);
     }
     else if (option == 111100)
@@ -457,7 +401,6 @@ void output_write_contents(struct file_line data, FILE * result, int option)
             data.from_airport_icao_code,
             data.from_airport_city);
 
-        printf("content: %s",print_ctnt);
         fputs(print_ctnt,result);
     }
     else if (option == 110110)
@@ -470,7 +413,6 @@ void output_write_contents(struct file_line data, FILE * result, int option)
             data.to_airport_icao_code,
             data.to_airport_country);
 
-        printf("content: %s",print_ctnt);
         fputs(print_ctnt,result);
     }
     else if (option == 111110)
@@ -482,12 +424,10 @@ void output_write_contents(struct file_line data, FILE * result, int option)
             data.from_airport_icao_code,
             data.to_airport_icao_code);
 
-        printf("content: %s",print_ctnt);
         fputs(print_ctnt,result);
     }
-    else {/*INVALID OPTION*/ printf("in default");}
-
-    
+    else {/*INVALID OPTION*/}
+ 
     fclose(result);
 }
 
@@ -526,11 +466,9 @@ char * strtok_single (char * line, char const * delims)
   static char * src = NULL;
   char * p, * ret_token = 0;
 
-  if (line != NULL)
-    src = line;
+  if (line != NULL) src = line;
 
-  if (src == NULL)
-    return NULL;
+  if (src == NULL) return NULL;
 
   if ((p = strpbrk (src, delims)) != NULL) {
     *p  = 0;
