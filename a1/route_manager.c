@@ -356,7 +356,7 @@ void output_write_header(struct file_line data, FILE * result, int option)
 {
     printf("writing header...\n");
     result = fopen("results.txt","a");
-    char print_hdr[150];
+    char print_hdr[250];
     switch (option)
     {      
         case 100101:
@@ -431,7 +431,7 @@ void output_write_contents(struct file_line data, FILE * result, int option)
 {
     printf("writing contents...\n");
     result = fopen("results.txt","a");
-    char print_ctnt[150];
+    char print_ctnt[250];
 
     if (option == 100101 || option == 110001)
     {
