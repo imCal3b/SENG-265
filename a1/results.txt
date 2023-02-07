@@ -1,4 +1,0 @@
-FLIGHTS FROM Paris, France TO Dubai, United Arab Emirates:
-AIRLINE: Air France (AFR) ROUTE: LFPG-OMDB
-AIRLINE: Alitalia (AZA) ROUTE: LFPG-OMDB
-AIRLINE: Emirates (UAE) ROUTE: LFPG-OMDB
