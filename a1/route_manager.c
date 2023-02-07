@@ -55,12 +55,9 @@ struct file_line {
  * @param argv The list of arguments passed to the program.
  * @return int 0: No errors; 1: Errors produced.
  *
- */ //-------------------------------------------------
+ */ 
 int main(int argc, char * argv[])
 {
-    // TODO: your code.
-    printf("\n---------------\n ROUTE MANAGER\n---------------\n\n");
-
     struct input inputs[13];
     read_arguments(argc,argv,1,inputs);
 
@@ -68,10 +65,8 @@ int main(int argc, char * argv[])
     read_file(data_file,inputs,argc-1);
 
     fclose(data_file);
-    printf("\n----------\n COMPLETE\n----------\n");
     exit(0);
 }
-//------------------------------------------------------
 
 /*
 Function:   looks through the arguments specified when running the program.
@@ -79,25 +74,23 @@ Parameters: int argc - the number of arguments.
             char **argv - a pointer to the array of pointers pointing to the
             specified arguments.
             int arg_index - keeps track of the index in argv to read from.
-            struct input cur_ptr[] - pass through inputs[] to store field
+            struct input cur_arg[] - pass through inputs[] to store field
             and argument parameters.
 return: NA
 PreConditions: must be at least one argument specified at program call.
 */
-void read_arguments(int argc, char ** argv, int arg_index, struct input cur_ptr[]) 
+void read_arguments(int argc, char ** argv, int arg_index, struct input cur_arg[]) 
 {
-    if (argc == 1) {
-        // no arguments given
-        return;
-
-    } else if (arg_index == argc || arg_index > 13) { // TODO: check logic
+    if (arg_index == argc || arg_index == 13) {
         return;
 
     } else {
         int index_os = arg_index - 1;
-        sscanf(*(argv+arg_index),"--%[A-Z_]=%[^\t\n]",cur_ptr[index_os].data_field,cur_ptr[index_os].argument);
+        sscanf(*(argv+arg_index),"--%[A-Z_]=%[^\t\n]",
+            cur_arg[index_os].data_field,
+            cur_arg[index_os].argument);
 
-        return read_arguments(argc,argv,++arg_index,cur_ptr);
+        return read_arguments(argc,argv,++arg_index,cur_arg);
     }
 }
 
@@ -115,7 +108,7 @@ void read_file(FILE * stream, struct input inputs[], int num_arg)
     struct file_line data;
     FILE * result_file;
 
-    if (access("results.txt",0) == 0) remove("results.txt"); //CHECK: library associated with access() function
+    if (access("output.txt",0) == 0) remove("output.txt");
     
     char line[1024];
     int match = 0;
@@ -200,7 +193,7 @@ Parameters: struct file_line data - passes through the parsed data from the line
             struct input inputs[] - passes through the input arguments for comparing with data.
             int num_arg - identifier for the number of iterations required to compare
             all arguments passed to the program.
-            int i - counter variable.
+            int arg_cnt - counter to keep track of which input argument is being compared.
 Return: int - returns a boolean value 1 (1==true ; 0==false) when all arguments passed to the
         program match with the corresponding data value from the parsed line.
 PreConditions:  must have line items and an input argument to compare against. If no arguments
@@ -260,10 +253,7 @@ int compare(struct file_line data, struct input inputs[], int num_arg, int arg_c
         return 0;
     }
     else
-    {
-        // NOT AN ALLOWED FIELD
-        return 0;
-    }
+    {return 0;} // NOT AN ALLOWED FIELD
 
 }
 
@@ -273,6 +263,7 @@ Parameters: struct file_line data - passing through the parsed data to be used f
             printing outputs to the output file.
             FILE * result - a pointer to the output file.
             int bool - a value used to define a matching state (val=0), or, no match found state (val=1).
+            int option - the specifier for which output format should be used in the output file.
 Return: NA
 PreConditions: NA
 */
@@ -281,13 +272,13 @@ void write_file(struct file_line data, FILE * result, int bool,int option)
     if (bool == 0)
     {
         // no matches found
-        result = fopen("results.txt","w");
+        result = fopen("output.txt","w");
         fputs("NO RESULTS FOUND.\n",result);
         fclose(result);
         return;
     }
 
-    result = fopen("results.txt","a");
+    result = fopen("output.txt","a");
     output_write_contents(data,result,option);
     fclose(result);
 }
@@ -296,26 +287,16 @@ void write_file(struct file_line data, FILE * result, int bool,int option)
 Function:   writes the header for the results.txt file based on the arguments specified.
 Parameters: struct file_line data - pass through the data fields to be used in header.
             FILE * result - pointer to the output file so we can access and write to it.
-            int option - identifier for output based on the arguments given
+            int option - identifier for which output format should be used.
 Return: NA
 PreConditions: Runs when the first matching case is encountered. Otherwise does not run.
 */
 void output_write_header(struct file_line data, FILE * result, int option)
 {
-    result = fopen("results.txt","a");
+    result = fopen("output.txt","a");
     char print_hdr[250];
     switch (option)
     {      
-        case 100101:
-            //AIRLINE SRC_COUNTRY
-            snprintf(print_hdr,sizeof(print_hdr),"FLIGHTS FROM %s BY %s (%s):\n",
-                data.from_airport_country,
-                data.airline_name,
-                data.airline_icao_code);
-
-            fputs(print_hdr,result);
-            break;
-
         case 110001:
             //AIRLINE DEST_COUNTRY
             snprintf(print_hdr,sizeof(print_hdr),"FLIGHTS TO %s BY %s (%s):\n",
@@ -347,16 +328,6 @@ void output_write_header(struct file_line data, FILE * result, int option)
             fputs(print_hdr,result);
             break;
         
-        case 110110:
-            //SRC_CITY SRC_COUNTRY DEST_COUNTRY
-            snprintf(print_hdr,sizeof(print_hdr),"FLIGHTS FROM %s, %s TO %s:\n",
-                data.from_airport_city,
-                data.from_airport_country,
-                data.to_airport_country);
-
-            fputs(print_hdr,result);
-            break;
-        
         default:
             // NONE-INVALID PARAMETER INPUT
             break;
@@ -369,18 +340,18 @@ void output_write_header(struct file_line data, FILE * result, int option)
 Function: writes the output line data in results.txt when a matching item is found.
 Parameters: struct file_line data - pass through the data fields to be in line contents.
             FILE * result - pointer to the output file so we can access and write to it.
-            int option - identifier for output based on the arguments given.
+            int option - identifier for output format of the output file.
 Return: NA
 PreConditions: Runs when a matching case is found.
 */
 void output_write_contents(struct file_line data, FILE * result, int option)
 {
-    result = fopen("results.txt","a");
+    result = fopen("output.txt","a");
     char print_ctnt[250];
 
-    if (option == 100101 || option == 110001)
+    if (option == 110001)
     {
-        //AIRLINE SRC_COUNTRY or DEST_COUNTRY
+        //AIRLINE DEST_COUNTRY
         snprintf(print_ctnt,sizeof(print_ctnt),"FROM: %s, %s, %s TO: %s (%s), %s\n",
             data.from_airport_icao_code,
             data.from_airport_city,
@@ -400,18 +371,6 @@ void output_write_contents(struct file_line data, FILE * result, int option)
             data.from_airport_name,
             data.from_airport_icao_code,
             data.from_airport_city);
-
-        fputs(print_ctnt,result);
-    }
-    else if (option == 110110)
-    {
-        //SRC_CITY SRC_COUNTRY DEST_COUNTRY
-        snprintf(print_ctnt,sizeof(print_ctnt),"AIRLINE: %s (%s) DESTINATION: %s (%s), %s\n",
-            data.airline_name,
-            data.airline_icao_code,
-            data.to_airport_name,
-            data.to_airport_icao_code,
-            data.to_airport_country);
 
         fputs(print_ctnt,result);
     }
