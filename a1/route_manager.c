@@ -429,12 +429,14 @@ char * strtok_single (char * line, char const * delims)
 
   if (src == NULL) return NULL;
 
-  if ((p = strpbrk (src, delims)) != NULL) {
+  if ((p = strpbrk (src, delims)) != NULL) 
+  {
     *p  = 0;
     ret_token = src;
     src = ++p;
 
-  } else if (*src) {
+  } else if (*src) 
+  {
     ret_token = src;
     src = NULL;
   }
