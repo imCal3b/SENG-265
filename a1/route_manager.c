@@ -419,6 +419,8 @@ Parameters: char * str - pointer to the string to be tokenized.
             char const * delims - identifies the deliminating character(s).
 Return: char * - pointer to the token element.
 PreConditions: NA
+NOTES: strtok_single() implementation borrowed from user 'Filip Roseen' in response to stack overflow question from the link below. The following function was borrowed for the purpose of handling the empty data fields in the csv, allowing data to be appropriately parsed into the struct elements.
+https://stackoverflow.com/questions/8705844/need-to-know-when-no-data-appears-between-two-token-separators-using-strtok 
 */
 char * strtok_single (char * line, char const * delims)
 {
