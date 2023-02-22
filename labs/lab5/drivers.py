@@ -6,7 +6,7 @@ def main():
     drivers_df: pd.DataFrame = pd.read_csv('drivers.csv')
     results_df: pd.DataFrame = pd.read_csv('results.csv')
 
-    drivers_df.drop(['driverRef','number','code','dob','nationality','url'], inplace=True, axis=1)
+    drivers_df.drop(['driverRef','number','code','dob','url'], inplace=True, axis=1)
     results_df.drop(['raceId','constructorId','number','grid','position','positionText','points',
                     'laps','time','milliseconds','fastestLap','rank','fastestLapTime',
                     'fastestLapSpeed','statusId'], inplace=True, axis=1)
@@ -15,9 +15,9 @@ def main():
     
     merged_df: pd.DataFrame = results_df.merge(drivers_df, on='driverId', how='left')
 
-    answer: pd.DataFrame = merged_df.groupby(['driverId','forename','surname'], 
+    answer: pd.DataFrame = merged_df.groupby(['nationality'], 
                                             as_index=False).size().sort_values(by='size', 
-                                            ascending=False).head(20)
+                                            ascending=False).head(10)
     
     print(answer)
 
