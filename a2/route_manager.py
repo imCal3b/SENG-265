@@ -32,7 +32,7 @@ def get_inputs() -> dict:
         temp1, temp2 = sys.argv[i].split("=")
         arg_type = temp1.split("--")[1]
 
-        if ".yaml" in temp2: 
+        if ".yaml" in temp2: # NOTE: possible change (not needed) when running in VM
             arg = "./a2/" + temp2
         else:
             arg = temp2
