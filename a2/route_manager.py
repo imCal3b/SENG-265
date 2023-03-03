@@ -47,8 +47,8 @@ Function:   Take the input arguments and open the specified yaml
 Inputs:     inputs: dict - Dictionary of the input arguments.
 Return:     list - List containing the created DataFrames.
 """
-def create_arg_dataframes(inputs: dict) -> list:
-    df_list: list = []
+def create_arg_dataframes(inputs: dict) -> dict:
+    df_dict: dict = dict({})
 
     for key in inputs:
 
@@ -60,33 +60,42 @@ def create_arg_dataframes(inputs: dict) -> list:
                     airlines_df: pd.DataFrame = pd.json_normalize(airlines["airlines"])
 
                     # airline_id | airline_name | airline_icao_unique_code | airline_country
-                    df_list.append(airlines_df)
+                    df_dict.update({"AIRLINES":airlines_df})
 
                 elif key == "AIRPORTS":
                     airports: dict = yaml.safe_load(arg_file)
                     airports_df: pd.DataFrame = pd.json_normalize(airports["airports"])
 
                     # airport_id | airport_name | airport_city | airport_country | airport_icao_unique_code | airport_altitude
-                    df_list.append(airports_df)
+                    df_dict.update({"AIRPORTS":airports_df})
                 
                 elif key == "ROUTES":
                     routes: dict = yaml.safe_load(arg_file)
                     routes_df: pd.DataFrame = pd.json_normalize(routes["routes"])
 
                     # route_airline_id | route_from_airport_id | route_to_airport_id
-                    df_list.append(routes_df)
+                    df_dict.update({"ROUTES":routes_df})
 
                 else:
                     continue
 
                 arg_file.close()
 
-    return df_list
+    return df_dict
 
 """
 Function:   a
 """
-def question_select(inputs: dict, df_list) -> None:
+def question_select(inputs: dict, df_dict: dict) -> None:
+     # data fields:
+     # airline_id | airline_name | airline_icao_unique_code | airline_country
+     # airport_id | airport_name | airport_city | airport_country | airport_icao_unique_code | airport_altitude
+     # route_airline_id | route_from_airport_id | route_to_airport_id
+
+     airlines_df: pd.DataFrame = df_dict["AIRLINES"]
+     airports_df: pd.DataFrame = df_dict["AIRPORTS"]
+     routes_df: pd.DataFrame = df_dict["ROUTES"]
+     
      parameters: dict
      key: str = "QUESTION"
      if key in inputs:
@@ -99,43 +108,96 @@ def question_select(inputs: dict, df_list) -> None:
             # airlines: airline_id, airline_name
             # airports: airport_id, airport_country
             # routes: route_airline_id, route_to_airport_id
-            parameters = {"field1" : "add", "field2" : "add2"}
 
-         if inputs[key] == "q2":
+            airlines_df.drop(['airline_icao_unique_code','airline_country'],inplace=True,axis=1)
+            airports_df.drop(['airport_name','airport_city','airport_icao_unique_code','airport_altitude'],inplace=True,axis=1)
+            routes_df.drop(['route_from_aiport_id'],inplace=True,axis=1)
+
+            airports_df = airports_df[airports_df['airport_country'] == 'Canada']
+            
+            merged_df: pd.DataFrame = pd.merge(routes_df,airlines_df, left_on=['route_airline_id'], right_on=['airline_id'])
+            merged_df = pd.merge(merged_df, airports_df, left_on=['route_to_airport_id'], right_on=['airport_id'])
+
+            result: pd.DataFrame = merged_df.groupby(['airline_name'], 
+                                                     as_index=False).size().sort_values(by=['size','airline_name'],
+                                                     ascending=[False,True]).head(20)
+
+            print(result)
+
+         elif inputs[key] == "q2":
             # Q - What are the top 30 countries with least appearances as
             # destination country on the routes data?
 
             # airlines: NA
             # airports: airport_id, airport_country
             # routes: route_to_airport_id 
-            parameters = {"field1" : "add", "field2" : "add2"}
+            airports_df.drop(['airport_name','airport_city','airport_icao_unique_code','airport_altitude'],inplace=True,axis=1)
+            routes_df.drop(['route_airline_id','route_from_aiport_id'],inplace=True,axis=1)
 
-         if inputs[key] == "q3":
+            airports_df['airport_country'] = airports_df['airport_country'].str.strip()
+            merged_df: pd.DataFrame = pd.merge(routes_df,airports_df,left_on=['route_to_airport_id'],right_on=['airport_id'])
+
+            result: pd.DataFrame = merged_df.groupby(['airport_country'],
+                                                     as_index=False).size().sort_values(by=['size','airport_country'],
+                                                     ascending=[True,True]).head(30)
+
+            print(result)
+
+         elif inputs[key] == "q3":
             # Q - What are the top 10 destination airports?
 
             # airlines: NA
             # airports: airport_id, airport_name, airport_city, airport_country, airport_icao_unique_code
             # routes: route_to_airport_id
-            parameters = {"field1" : "add", "field2" : "add2"}
+            airports_df.drop(['airport_altitude'],inplace=True,axis=1)
+            routes_df.drop(['route_airline_id','route_from_aiport_id'],inplace=True,axis=1)
 
-         if inputs[key] == "q4":
-            # Q - What are the top 10 destination cities?
+            merged_df: pd.DataFrame = pd.merge(routes_df,airports_df,left_on=['route_to_airport_id'],right_on=['airport_id'])
+
+            result: pd.DataFrame = merged_df.groupby(['airport_name'],
+                                                     as_index=False).size().sort_values(by=['size','airport_name'],
+                                                     ascending=[False,True]).head(10)
+
+            print(result)
+
+         elif inputs[key] == "q4":
+            # Q - What are the top 15 destination cities?
 
             # airlines: NA
             # airports: airport_id, airport_city, airport_country
             # routes: route_to_airport_id
-            parameters = {"field1" : "add", "field2" : "add2"}
+            airports_df.drop(['airport_name','airport_icao_unique_code','airport_altitude'],inplace=True,axis=1)
+            routes_df.drop(['route_airline_id','route_from_aiport_id'],inplace=True,axis=1)
 
-         if inputs[key] == "q5":
+            merged_df: pd.DataFrame = pd.merge(routes_df,airports_df,left_on=['route_to_airport_id'],right_on=['airport_id'])
+
+            result: pd.DataFrame = merged_df.groupby(['airport_city','airport_country'],
+                                                     as_index=False).size().sort_values(by=['size','airport_city'],
+                                                     ascending=[False,True]).head(15)
+
+            print(result)
+
+         elif inputs[key] == "q5":
             # Q - What are the unique top 10 Canadian routes with the
             # most difference between the destination altitude and the
             # origin altitude? (if CYYJ-CYVR is included, CYVR-CYYJ should not)
 
             # airlines: NA
-            # airports: airport_id, airport_icao_unique_code, airport_altitude
+            # airports: airport_id, airport_country, airport_icao_unique_code, airport_altitude
             # routes: route_from_airport_id, route_to_airport_id
-            parameters = {"field1" : "add", "field2" : "add2"}
-        
+            airports_df.drop(['airport_name','airport_city'],inplace=True,axis=1)
+            routes_df.drop(['route_airline_id'],inplace=True,axis=1)
+
+            merged_from_df: pd.DataFrame = pd.merge(routes_df,airports_df,left_on=['route_from_aiport_id'],right_on=['airport_id'])
+            merged_to_df: pd.DataFrame = pd.merge(routes_df,airports_df,left_on=['route_to_airport_id'],right_on=['airport_id'])
+
+            result: pd.DataFrame = merged_df.groupby(['airport_city','airport_country'],
+                                                     as_index=False).size().sort_values(by=['size','airport_city'],
+                                                     ascending=[False,True]).head(15)
+            
+            print(result)
+
+        # else: Invalid Input 
 
 def main():
     inputs_dict: dict = get_inputs()
@@ -145,9 +207,9 @@ def main():
         print(f"{key} : {inputs_dict[key]}")
     print()
 
-    df_list: list = create_arg_dataframes(inputs_dict)
+    df_dict: dict = create_arg_dataframes(inputs_dict)
 
-    question_select(inputs_dict, df_list)
+    question_select(inputs_dict, df_dict)
 
 
 if __name__ == '__main__':
