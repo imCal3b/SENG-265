@@ -34,10 +34,11 @@ def get_inputs() -> dict:
         temp1, temp2 = sys.argv[i].split("=")
         arg_type = temp1.split("--")[1]
 
-        if ".yaml" in temp2:            # NOTE: possible change (not needed) when running in VM??
-            arg = "./a2/" + temp2
-        else:
-            arg = temp2
+        # if ".yaml" in temp2:            # NOTE: possible change (not needed) when running in VM??
+        #     arg = "./a2/" + temp2
+        # else:
+        #     arg = temp2
+        arg = temp2
 
         inputs.update({arg_type:arg})
 
@@ -242,8 +243,8 @@ def create_output(inputs: dict, result_df: pd.DataFrame) -> None:
     result_df.rename(columns={list(result_df)[0]:"subject"}, inplace=True)
     result_df.rename(columns={list(result_df)[1]:"statistic"}, inplace=True)
 
-    csv_output_path: str = "./a2/" + inputs['QUESTION'] + ".csv"
-    pdf_output_path: str = "./a2/" + inputs['QUESTION'] + ".pdf"
+    csv_output_path: str = inputs['QUESTION'] + ".csv" # "./a2/" + 
+    pdf_output_path: str = inputs['QUESTION'] + ".pdf" # "./a2/" + 
     result_df.to_csv(csv_output_path, index=False)
 
     # key: str = "QUESTION"
