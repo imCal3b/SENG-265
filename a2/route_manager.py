@@ -242,8 +242,9 @@ def create_output(inputs: dict, result_df: pd.DataFrame) -> None:
     result_df.rename(columns={list(result_df)[0]:"subject"}, inplace=True)
     result_df.rename(columns={list(result_df)[1]:"statistic"}, inplace=True)
 
-    output_path: str = "./a2/" + inputs['QUESTION'] + ".csv"
-    result_df.to_csv(output_path, index=False)
+    csv_output_path: str = "./a2/" + inputs['QUESTION'] + ".csv"
+    pdf_output_path: str = "./a2/" + inputs['QUESTION'] + ".pdf"
+    result_df.to_csv(csv_output_path, index=False)
 
     # key: str = "QUESTION"
     # if key in inputs:
