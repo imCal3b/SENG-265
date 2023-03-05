@@ -203,6 +203,8 @@ def question_select(inputs: dict, df_dict: dict) -> None:
 
             result: pd.DataFrame = pd.merge(merged_from_df,airports_df,
                                             left_on=['route_to_airport_id'],right_on=['to_airport_id'])
+            
+            result['route_icao'] = result['airport_icao_unique_code'].str.cat([result['to_airport_icao_unique_code']],sep='-')
 
             result['EL_Delta'] = numpy.where(result['airport_altitude'] == result['to_airport_altitude'], 0,
                                              abs(result['airport_altitude'] - result['to_airport_altitude']))
