@@ -10,16 +10,18 @@ Sample input: --AIRLINES="airlines.yaml" --AIRPORTS="airports.yaml" --ROUTES="ro
 import pandas as pd
 import yaml
 import sys
-import os
+import numpy
+import os # not used
 
-"""
-Function:   Read and parse the input arguments from program call
-            and store data values in the list parameters passed
-            to the function.
-Inputs:     NA.
-Return:     dict - A dictionary containing the input arguments.
-"""
+
 def get_inputs() -> dict:
+    """
+    Function:   Read and parse the input arguments from program call
+                and store data values in the list parameters passed
+                to the function.
+    Inputs:     NA.
+    Return:     dict - A dictionary containing the input arguments.
+    """
     arg_type: str
     arg: str
 
@@ -32,7 +34,7 @@ def get_inputs() -> dict:
         temp1, temp2 = sys.argv[i].split("=")
         arg_type = temp1.split("--")[1]
 
-        if ".yaml" in temp2: # NOTE: possible change (not needed) when running in VM
+        if ".yaml" in temp2:            # NOTE: possible change (not needed) when running in VM??
             arg = "./a2/" + temp2
         else:
             arg = temp2
@@ -41,13 +43,14 @@ def get_inputs() -> dict:
 
     return inputs
 
-"""
-Function:   Take the input arguments and open the specified yaml
-            files as pandas DataFrames.
-Inputs:     inputs: dict - Dictionary of the input arguments.
-Return:     list - List containing the created DataFrames.
-"""
+
 def create_arg_dataframes(inputs: dict) -> dict:
+    """
+    Function:   Take the input arguments and open the specified yaml
+                files as pandas DataFrames.
+    Inputs:     inputs: dict - Dictionary of the input arguments.
+    Return:     list - List containing the created DataFrames.
+    """
     df_dict: dict = dict({})
 
     for key in inputs:
@@ -187,13 +190,27 @@ def question_select(inputs: dict, df_dict: dict) -> None:
             # routes: route_from_airport_id, route_to_airport_id
             airports_df.drop(['airport_name','airport_city'],inplace=True,axis=1)
             routes_df.drop(['route_airline_id'],inplace=True,axis=1)
+            
+            airports_df['airport_altitude'] = pd.to_numeric(airports_df['airport_altitude'])
 
-            merged_from_df: pd.DataFrame = pd.merge(routes_df,airports_df,left_on=['route_from_aiport_id'],right_on=['airport_id'])
-            merged_to_df: pd.DataFrame = pd.merge(routes_df,airports_df,left_on=['route_to_airport_id'],right_on=['airport_id'])
+            merged_from_df: pd.DataFrame = pd.merge(routes_df,airports_df,
+                                                    left_on=['route_from_aiport_id'],right_on=['airport_id'])
+            
+            airports_df.rename(columns={"airport_id":"to_airport_id"}, inplace=True)
+            airports_df.rename(columns={"airport_country":"to_airport_country"}, inplace=True)
+            airports_df.rename(columns={"airport_icao_unique_code":"to_airport_icao_unique_code"}, inplace=True)
+            airports_df.rename(columns={"airport_altitude":"to_airport_altitude"}, inplace=True)
 
-            result: pd.DataFrame = merged_df.groupby(['airport_city','airport_country'],
-                                                     as_index=False).size().sort_values(by=['size','airport_city'],
-                                                     ascending=[False,True]).head(15)
+            result: pd.DataFrame = pd.merge(merged_from_df,airports_df,
+                                            left_on=['route_to_airport_id'],right_on=['to_airport_id'])
+
+            result['EL_Delta'] = numpy.where(result['airport_altitude'] == result['to_airport_altitude'], 0,
+                                             abs(result['airport_altitude'] - result['to_airport_altitude']))
+            
+            result = result[result['airport_country'] == 'Canada']
+            result = result[result['to_airport_country'] == 'Canada']
+            
+            result = result.sort_values(by=['EL_Delta'], ascending=False).head(10)
             
             print(result)
 
