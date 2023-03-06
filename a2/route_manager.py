@@ -11,7 +11,7 @@ import pandas as pd
 import yaml
 import sys
 import numpy
-import os # not used
+import matplotlib.pyplot as plt
 
 
 def get_inputs() -> dict:
@@ -34,11 +34,12 @@ def get_inputs() -> dict:
         temp1, temp2 = sys.argv[i].split("=")
         arg_type = temp1.split("--")[1]
 
-        # if ".yaml" in temp2:            # NOTE: possible change (not needed) when running in VM??
-        #     arg = "./a2/" + temp2
-        # else:
-        #     arg = temp2
-        arg = temp2
+        if ".yaml" in temp2:            # NOTE: possible change (not needed) when running in VM??
+            arg = "./a2/" + temp2
+        else:
+            arg = temp2
+        
+        # arg = temp2
 
         inputs.update({arg_type:arg})
 
@@ -238,31 +239,41 @@ def question_select(inputs: dict, df_dict: dict) -> pd.DataFrame:
 
 def create_output(inputs: dict, result_df: pd.DataFrame) -> None:
     """
-    Function:   
+    Function:   Create the .csv and .pdf output.
+    Inputs:     inputs: dict - The dictionary containing the input arguments.
+                result_df: pd.DataFrame - The resultant DataFrame returned
+                from the question_select() function.
+    Return:     NA (creates .csv and .pdf outputs)
     """
     result_df.rename(columns={list(result_df)[0]:"subject"}, inplace=True)
     result_df.rename(columns={list(result_df)[1]:"statistic"}, inplace=True)
 
-    csv_output_path: str = inputs['QUESTION'] + ".csv" # "./a2/" + 
-    pdf_output_path: str = inputs['QUESTION'] + ".pdf" # "./a2/" + 
+    csv_output_path: str = "./a2/" + inputs['QUESTION'] + ".csv" # "./a2/" + 
+    pdf_output_path: str = "./a2/" + inputs['QUESTION'] + ".pdf" # "./a2/" + 
     result_df.to_csv(csv_output_path, index=False)
 
-    # key: str = "QUESTION"
-    # if key in inputs:
-    #     if inputs[key] == "q1":
-    #         result_df.to_csv('./a2/q1.csv',index=False)
+    names: list = list(result_df['subject'])
+    data: list = list(result_df['statistic'])
 
-    #     elif inputs[key] == "q2":
-    #         pass
+    key: str = "GRAPH_TYPE"
+    if key in inputs:
+        if inputs[key] == "bar":
+            plt.bar(names,data)
 
-    #     elif inputs[key] == "q3":
-    #         pass
+            plt.xticks(rotation=90)
+            
+            plt.xlabel("Airlines")
+            plt.ylabel("Canadian Destinations")
+            plt.title("Top 20 Airlines With Most Canadian Destinations")
 
-    #     elif inputs[key] == "q4":
-    #         pass
+            plt.show()
 
-    #     elif inputs[key] == "q5":
-    #         pass
+            pass
+
+        elif inputs[key] == "pie":
+            pass
+
+
 
 
 
