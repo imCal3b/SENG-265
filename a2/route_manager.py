@@ -231,7 +231,6 @@ def question_select(inputs: dict, df_dict: dict) -> pd.DataFrame:
             
             result = result.sort_values(by=['EL_Delta'], ascending=False).head(10)
             
-            print(result)
             return result
 
         # else: Invalid Input 
@@ -245,6 +244,12 @@ def create_output(inputs: dict, result_df: pd.DataFrame) -> None:
                 from the question_select() function.
     Return:     NA (creates .csv and .pdf outputs)
     """
+    labels_dict: dict = {'q1':['Airlines','Canadian Destinations','Top 20 Airlines With Most Canadian Destinations'],
+                    'q2':['Countries','Appearances','Top 30 Countries With Least Appearances as a Destination'],
+                    'q3':['Airports','Appearances','Top 10 Destination Airports'],
+                    'q4':['Cities','Appearances','Top 15 Destination cities'],
+                    'q5':['Route','Elevation Difference','Top 10 Canadian Routes With Greatest Elevation Difference'] }
+
     result_df.rename(columns={list(result_df)[0]:"subject"}, inplace=True)
     result_df.rename(columns={list(result_df)[1]:"statistic"}, inplace=True)
 
@@ -252,39 +257,40 @@ def create_output(inputs: dict, result_df: pd.DataFrame) -> None:
     pdf_output_path: str = "./a2/" + inputs['QUESTION'] + ".pdf" # "./a2/" + 
     result_df.to_csv(csv_output_path, index=False)
 
-    names: list = list(result_df['subject'])
+    labels: list = labels_dict[inputs['QUESTION']]
+
+    
     data: list = list(result_df['statistic'])
+    names: list = list(result_df['subject'])
+
 
     key: str = "GRAPH_TYPE"
     if key in inputs:
         if inputs[key] == "bar":
             plt.bar(names,data)
 
-            plt.xticks(rotation=90)
+            plt.xticks(rotation=80,fontsize=5)
             
-            plt.xlabel("Airlines")
-            plt.ylabel("Canadian Destinations")
-            plt.title("Top 20 Airlines With Most Canadian Destinations")
+            plt.xlabel(labels[0])
+            plt.ylabel(labels[1])
+            plt.title(labels[2])
 
-            plt.show()
+            plt.tight_layout()
 
-            pass
+            plt.savefig(pdf_output_path)
 
         elif inputs[key] == "pie":
-            pass
+            plt.pie(data,labels=names,autopct='%.1f%%',textprops={'fontsize': 5},labeldistance=1.03)
 
+            plt.title(labels[2])
 
-
+            plt.tight_layout()
+            
+            plt.savefig(pdf_output_path)
 
 
 def main():
     inputs_dict: dict = get_inputs()
-
-    # print inputs
-    for key in inputs_dict:
-        print(f"{key} : {inputs_dict[key]}")
-    print()
-
     df_dict: dict = create_arg_dataframes(inputs_dict)
 
     create_output(inputs_dict, question_select(inputs_dict, df_dict))
