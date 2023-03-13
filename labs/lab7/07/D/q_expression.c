@@ -9,6 +9,8 @@
 void inccounter(node_t *p, void *arg);
 void print_node(node_t *p, void *arg);
 void analysis(node_t *l);
+char op_check(char * tok);
+int val_check(char * tok);
 
 int main(int argc, char *argv[]) {
 
@@ -42,15 +44,14 @@ int main(int argc, char *argv[]) {
 	
 	char * tok = strtok(argv[1], " ");
 	
-	node_t * cur;
 	while (tok)
 	{
-		if (tok.strcmp("*")==0 || tok.strcmp("/") || tok.strcmp("+")==0 || tok.strcmp("-")) {
-			
-		}
-		tok = strtok(NULL, " ")
-	}	
+		node_t * cur = new_node(op_check(tok),val_check(tok));
 
+        list = add_end(list, cur);
+		tok = strtok(NULL, " ");
+	}	
+    analysis(list);
     exit(0); 
 }
 
@@ -76,8 +77,18 @@ void analysis(node_t *l) {
     apply(l, print_node, "%c:%d\n");
 }
 
-char val_check() {
-	if (tok.strcmp("*")==0 || tok.strcmp("/") || tok.strcmp("+")==0 || tok.strcmp("-")) {
-		return 
-	}
+char op_check(char * tok) {
+	if (tok=='*' || tok=='/' || tok=='+' || tok=='-') {
+		return tok;
+	} else {
+        return 'V';
+    }
+}
+
+int val_check(char * tok) {
+	if (tok=='*' || tok=='/' || tok=='+' || tok=='-') {
+		return 0;
+	} else {
+        return atoi(tok);
+    }
 }
