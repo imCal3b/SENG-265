@@ -40,12 +40,11 @@ int main(int argc, char *argv[]) {
     }
 
     /* COMPLETE IMPLEMENTATION BELOW. */
-	char * list = NULL;
+	node_t * list = NULL;
 	
 	char * tok = strtok(argv[1], " ");
 	
-	while (tok)
-	{
+	while (tok)	{
 		node_t * cur = new_node(op_check(tok),val_check(tok));
 
         list = add_end(list, cur);
@@ -55,18 +54,15 @@ int main(int argc, char *argv[]) {
     exit(0); 
 }
 
-
 void inccounter(node_t *p, void *arg) {
     int *ip = (int *)arg;
     (*ip)++;
 }
 
-
 void print_node(node_t *p, void *arg) {
     char *fmt = (char *)arg;
     printf(fmt, p->op, p->val);
 }
-
 
 void analysis(node_t *l) {
     int len = 0;
@@ -78,15 +74,15 @@ void analysis(node_t *l) {
 }
 
 char op_check(char * tok) {
-	if (tok=='*' || tok=='/' || tok=='+' || tok=='-') {
-		return tok;
+	if ((*tok)=='*' || (*tok)=='/' || (*tok)=='+' || (*tok)=='-') {
+		return *tok;
 	} else {
         return 'V';
     }
 }
 
 int val_check(char * tok) {
-	if (tok=='*' || tok=='/' || tok=='+' || tok=='-') {
+	if ((*tok)=='*' || (*tok)=='/' || (*tok)=='+' || (*tok)=='-') {
 		return 0;
 	} else {
         return atoi(tok);
