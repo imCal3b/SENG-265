@@ -6,6 +6,13 @@
 
 #define MAX_WORD_LEN 50
 
+typedef struct input
+{
+    char * data_file;
+    char * question;
+    int num_outputs;
+} input;
+
 /**
  * @brief An struct that represents a node in the linked list.
  */
