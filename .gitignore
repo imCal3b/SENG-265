@@ -6,3 +6,4 @@ output.txt
 *.csv
 *.pdf 
 *.swp
+*.o
