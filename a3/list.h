@@ -6,10 +6,19 @@
 
 #define MAX_WORD_LEN 50
 
+typedef struct q_ref
+{
+	int fields;
+	char field1[30];
+	char field2[30];
+	char field3[30];
+	char field4[30];
+} q_ref;
+
 typedef struct input
 {
     char * data_file;
-    char * question;
+    int question;
     int num_outputs;
 } input;
 

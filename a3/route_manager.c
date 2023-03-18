@@ -18,6 +18,9 @@ void inccounter(node_t *p, void *arg);
 void print_node(node_t *p, void *arg);
 void analysis(node_t *l);
 
+input* read_arguments(int argc, char **argv, input * arguments); 
+void init_q_options(q_ref q_opt[]);
+
 // TODO: Make sure to adjust this based on the input files given
 #define MAX_LINE_LEN 80
 
@@ -31,13 +34,48 @@ void analysis(node_t *l);
  */
 int main(int argc, char *argv[])
 {
-    input * inputs = (input*)emalloc(sizeof(input));
-    inputs = read_arguments(argc, argv, 1, inputs);
+	q_ref q_opt[3];
+	init_q_options(q_opt);
 
-    printf("DATA: %s \n Q: %s \n N: %d \n",
+	for (int i=0;i<3;i++)
+	{
+		printf("Q%d | #Fields: %d \n",i+1,q_opt[i].fields);
+		printf("%s|%s|%s|%s \n",
+						q_opt[i].field1,
+						q_opt[i].field2,
+						q_opt[i].field3,
+						q_opt[i].field4);
+		printf("\n");
+	}
+
+    input * inputs = (input*)malloc(sizeof(input));
+    inputs = read_arguments(argc, argv, inputs);
+
+    printf("DATA: %s \nQUESTION: %d \nN: %d \n",
         inputs->data_file,
-        inputs->data_file,
+        inputs->question,
         inputs->num_outputs);
+}
+
+void init_q_options(q_ref q_opt[])
+{
+	q_opt[0].fields = 2;
+	strncpy(q_opt[0].field1,"airline_name\0",sizeof(char)*30);
+	strncpy(q_opt[0].field2,"airline_icao_unique_code\0",sizeof(char)*30);
+	strncpy(q_opt[0].field3,"\0",sizeof(char)*30);
+	strncpy(q_opt[0].field4,"\0",sizeof(char)*30);
+
+	q_opt[1].fields = 1;
+	strncpy(q_opt[1].field1,"to_airport_country\0",sizeof(char)*30);
+	strncpy(q_opt[1].field2,"\0",sizeof(char)*30);
+	strncpy(q_opt[1].field3,"\0",sizeof(char)*30);
+	strncpy(q_opt[1].field4,"\0",sizeof(char)*30);
+
+	q_opt[2].fields = 4;
+	strncpy(q_opt[2].field1,"to_airport_name\0",sizeof(char)*30);
+	strncpy(q_opt[2].field2, "to_airport_icao_unique_code\0",sizeof(char)*30);
+	strncpy(q_opt[2].field3,"to_aiport_city\0",sizeof(char)*30);
+	strncpy(q_opt[2].field4,"to_airport_country\0",sizeof(char)*30);
 }
 
 /*
@@ -51,25 +89,32 @@ Parameters: int argc - the number of arguments.
 return: NA
 PreConditions: must be at least one argument specified at program call.
 */
-input *read_arguments(int argc, char **argv, int arg_index, input * arguments) 
+input* read_arguments(int argc, char **argv, input * arguments) 
 {
-    if (arg_index == argc || arg_index > 3) {
-        return;
+    if (argc == 1 || argc > 4) {
+		printf("incorrect number of arguments!\n");
+        exit(0);
 
     } else {
         char field[10];
-        char value[32];
-        int index_os = arg_index - 1;
-        for (int i=0;i<3;i++)
+        for (int i=1;i<4;i++)
         {
-            sscanf(*(argv+arg_index),"--%[A-Z]=%[^\t\n]",
+			char * value = (char*)malloc(sizeof(char) * 32);
+            sscanf(*(argv+i),"--%[A-Z]=%[^\t\n]",
                 field,
                 value);
+			
+			printf("Field: %s Value: %s \n",
+							field,
+							value);
 
             if (strcmp(field,"DATA") == 0) arguments->data_file = strdup(value);
-            else if (strcmp(field,"QUESTION") == 0) arguments->question = strdup(value);
-            else if (strcmp(field,"N") == 0) arguments->num_outputs = atoi(value);
-        }
+			else if (strcmp(field,"QUESTION") == 0) arguments->question = atoi(value);
+			else if (strcmp(field,"N") == 0) arguments->num_outputs = atoi(value);
+     
+		}
+		printf("\n");
+		return arguments;
     }
 }
 
