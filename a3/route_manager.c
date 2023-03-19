@@ -20,6 +20,7 @@ void analysis(node_t *l);
 
 input* read_arguments(int argc, char **argv, input * arguments); 
 void init_q_options(q_ref q_opt[]);
+node_t* yaml_to_node(node_t * list_head, q_ref opt[], input * args);
 
 // TODO: Make sure to adjust this based on the input files given
 #define MAX_LINE_LEN 100
@@ -109,6 +110,7 @@ input* read_arguments(int argc, char **argv, input * arguments)
 
 node_t* yaml_to_node(node_t * list_head, q_ref opt[], input * args)
 {
+	printf("\n");
     FILE * data_file = fopen(args->data_file,"r");
     char line[MAX_LINE_LEN];
 
@@ -116,24 +118,29 @@ node_t* yaml_to_node(node_t * list_head, q_ref opt[], input * args)
     node_t * cur;
     fgets(line,MAX_LINE_LEN,data_file);
     while (count < 5)
-    {
+    {		
+		char buff[32];
         fgets(line,MAX_LINE_LEN,data_file);
-        if (strncmp(line,"-",1) == 0 && count == 1) {
-            cur = (node_t *)emalloc(sizeof(node_t));
+		printf("line: %s",line);
+     
+	 	if (strncmp(line,"-",1) == 0 && count == 1) {
+            cur = (node_t*)malloc(sizeof(node_t));
 
         } else if (strncmp(line,"-",1) == 0 && count != 1) {
 
         }
 
-        sscanf(line,"%*[:] %s",
-            cur->word);
+        sscanf(line,"%*[^:]: %s",buff);
+		cur->word = strdup(buff);
 
-        printf("read: %s",cur->word);
-
+        printf("read: %s \n",cur->word);
+		printf("\n");
         count++;
     }
 
     fclose(data_file);
+
+	return list_head;
 }
 
 /*
