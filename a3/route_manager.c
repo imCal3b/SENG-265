@@ -73,8 +73,6 @@ int main(int argc, char *argv[])
 
 }
 
-
-
 /*
 Function:   looks through the arguments specified when running the program.
 Parameters: int argc - the number of arguments.
@@ -113,6 +111,16 @@ input* read_arguments(int argc, char **argv, input * arguments)
     }
 }
 
+/*
+Function:   Reads the line items of the yaml file and puts the route data required
+            by the question specified, into a node element. The node element is then
+            added to a list and sorted.
+Parameters: node_t * list_head - the node that defines the head of the list.
+            q_ref opt[] - the required data fields relative to the question requested.
+            input * args - the input arguments from program call.
+return:     node_t * - returns a node_t pointer to the node at the head of the list.
+PreConditions: NA
+*/
 node_t* yaml_to_node(node_t * list_head, q_ref opt[], input * args)
 {
 	printf("\n");
@@ -148,7 +156,7 @@ node_t* yaml_to_node(node_t * list_head, q_ref opt[], input * args)
 
 
         if (count%13 == 0) {
-        	//TODO: create function to check if node exists and order correctly
+        	//TODO: create function to check if node exists in list and order correctly
 			
 			printf("\n");
     		printf("fields: %s|%s|%s|%s \n",
