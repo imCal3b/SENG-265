@@ -119,21 +119,22 @@ node_t* yaml_to_node(node_t * list_head, q_ref opt[], input * args)
     fgets(line,MAX_LINE_LEN,data_file);
     while (count < 5)
     {		
-		char buff[32];
+        char arg_buff[32];
+		char val_buff[32];
         fgets(line,MAX_LINE_LEN,data_file);
 		printf("line: %s",line);
      
-	 	if (strncmp(line,"-",1) == 0 && count == 1) {
-            cur = (node_t*)malloc(sizeof(node_t));
+	 	// if (strncmp(line,"-",1) == 0 && count == 1) {
+        //     cur = (node_t*)malloc(sizeof(node_t));
 
-        } else if (strncmp(line,"-",1) == 0 && count != 1) {
+        // } else if (strncmp(line,"-",1) == 0 && count != 1) {
+                //TODO: create function to check if node exists and order correctly
+        // }
 
-        }
+        sscanf(line,"%*c %s: %s",arg_buff,val_buff);
+		cur->field1 = strdup(val_buff);
 
-        sscanf(line,"%*[^:]: %s",buff);
-		cur->word = strdup(buff);
-
-        printf("read: %s \n",cur->word);
+        printf("%s|%s \n",arg_buff,cur->field1);
 		printf("\n");
         count++;
     }
@@ -196,7 +197,7 @@ void inccounter(node_t *p, void *arg)
 void print_node(node_t *p, void *arg)
 {
     char *fmt = (char *)arg;
-    printf(fmt, p->word);
+    printf(fmt, p->subject);
 }
 
 /**

@@ -27,7 +27,12 @@ typedef struct input
  */
 typedef struct node_t
 {
-    char *word;
+    char *field1;
+    char *field2;
+    char *field3;
+    char *field4;
+    char *subject;
+    int statistic;
     struct node_t *next;
 } node_t;
 
