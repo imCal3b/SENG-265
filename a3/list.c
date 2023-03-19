@@ -12,6 +12,53 @@
 #include "emalloc.h"
 #include "list.h"
 
+node_t * order_sort(node_t* head,node_t* new)
+{
+    if (head == NULL) {
+        new->next = NULL;
+        return new;
+    }
+
+    node_t * cur;
+    node_t * prev = NULL;
+    int match = 0;
+    for (cur = head; cur != NULL; cur = cur->next)
+    {
+        // if item is already in list
+        if (strcmp(new->field1,cur->field1) == 0 && match == 0)
+        {
+            cur->statistic++;
+            match = 1;
+
+            // remove cur element from list to be re-sorted
+            if (prev != NULL) prev->next = cur->next;
+            else return cur; // already at head of list, just return
+
+            new = cur;
+            cur = head;
+        }
+
+        if (new->statistic < cur->statistic) {
+            prev = cur;
+        } else if (new->statistic == cur->statistic) {
+            if (strcmp(new->field1, cur->field1) > 0) prev = cur;
+            else break;
+        } else break;
+    }
+
+    // set new node to point to the next
+    new->next = cur;
+
+    if (prev == NULL) {
+        // if the new node is the head of the list
+        return new;
+    } else {
+        // if new node is in middle/end of list
+        prev->next = new;
+        return head;
+    }
+}
+
 /**
  * Function:  new_node
  * -------------------

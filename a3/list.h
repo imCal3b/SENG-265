@@ -39,6 +39,8 @@ typedef struct node_t
 /**
  * Function protypes associated with a linked list.
  */
+node_t * order_sort(node_t* head,node_t* new);
+
 node_t *new_node(char *val);
 node_t *add_front(node_t *, node_t *);
 node_t *add_end(node_t *, node_t *);

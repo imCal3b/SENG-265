@@ -128,46 +128,43 @@ node_t* yaml_to_node(node_t * list_head, q_ref opt[], input * args)
     char line[MAX_LINE_LEN];
 	
 	int q = args->question - 1;
-    int count = 1;
+    int count = 1; //27
     node_t * cur;
     fgets(line,MAX_LINE_LEN,data_file);
-    while (count < 27)
+    while (fgets(line,MAX_LINE_LEN,data_file))
     {		
         char arg_buff[32];
 		char val_buff[32];
-        fgets(line,MAX_LINE_LEN,data_file);
+        
      
 	 	if (strncmp(line,"-",1) == 0 && count == 1) {
             cur = (node_t*)malloc(sizeof(node_t));
+			cur->statistic = 0;
         }
 
-		printf("line: %s",line);
+		// printf("line: %s",line);
         sscanf(line,"%*c %[a-z_]: %s",arg_buff,val_buff);
 
-		if (strcmp(opt[q].field1,arg_buff) == 0) {
-			cur->field1 = strdup(val_buff);
-		} else if (strcmp(opt[q].field2, arg_buff) == 0) {
-			cur->field2 = strdup(val_buff);
-		} else if (strcmp(opt[q].field3, arg_buff) == 0) {
-			cur->field3 = strdup(val_buff);
-		} else if (strcmp(opt[q].field4, arg_buff) == 0) {
-			cur->field4 = strdup(val_buff);
-		}
+		if (strcmp(opt[q].field1,arg_buff) == 0) cur->field1 = strdup(val_buff);
+		else if (strcmp(opt[q].field2, arg_buff) == 0) cur->field2 = strdup(val_buff);
+		else if (strcmp(opt[q].field3, arg_buff) == 0) cur->field3 = strdup(val_buff);
+		else if (strcmp(opt[q].field4, arg_buff) == 0) cur->field4 = strdup(val_buff);
 
 
         if (count%13 == 0) {
-        	//TODO: create function to check if node exists in list and order correctly
-			
-			printf("\n");
-    		printf("fields: %s|%s|%s|%s \n",
-					cur->field1,
-					cur->field2,
-					cur->field3,
-					cur->field4);
-			printf("\n");
+			// printf("\n");
+    		// printf("fields: %s|%s|%s|%s \n",
+			// 		cur->field1,
+			// 		cur->field2,
+			// 		cur->field3,
+			// 		cur->field4);
+			// printf("\n");
 
-			list_head = add_front(list_head, cur);
+			if ((q == 1 && strcmp(cur->field3,"Canada") == 0) || q != 1) list_head = order_sort(list_head, cur);
+			else free(cur);
+
 			cur = (node_t*)malloc(sizeof(node_t));
+			cur->statistic = 0;
 		}
 
 		count++;
@@ -194,7 +191,7 @@ void init_q_options(q_ref q_opt[])
 	q_opt[0].fields = 2;
 	strncpy(q_opt[0].field1,"airline_name\0",sizeof(char)*30);
 	strncpy(q_opt[0].field2,"airline_icao_unique_code\0",sizeof(char)*30);
-	strncpy(q_opt[0].field3,"\0",sizeof(char)*30);
+	strncpy(q_opt[0].field3,"to_airport_country\0",sizeof(char)*30);
 	strncpy(q_opt[0].field4,"\0",sizeof(char)*30);
 
 	q_opt[1].fields = 1;
