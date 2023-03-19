@@ -31,7 +31,7 @@ node_t *new_node(char *val)
 
     node_t *temp = (node_t *)emalloc(sizeof(node_t));
 
-    temp->word = strdup(val);
+    temp->subject = strdup(val);
     temp->next = NULL;
 
     return temp;
@@ -105,7 +105,7 @@ node_t *add_inorder(node_t *list, node_t *new)
 
     for (curr = list; curr != NULL; curr = curr->next)
     {
-        if (strcmp(new->word, curr->word) > 0)
+        if (strcmp(new->subject, curr->subject) > 0)
         {
             prev = curr;
         }

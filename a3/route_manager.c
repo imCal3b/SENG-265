@@ -35,6 +35,9 @@ node_t* yaml_to_node(node_t * list_head, q_ref opt[], input * args);
  */
 int main(int argc, char *argv[])
 {
+	printf("\n-----------------------\n");
+	printf("----- PROG START ------\n");
+	printf("-----------------------\n");
     // Initializing Question options
     //------------------------------
 	q_ref q_opt[3];
@@ -65,6 +68,8 @@ int main(int argc, char *argv[])
     //-----------------------------------------------------
     node_t * result_list = NULL;
     result_list = yaml_to_node(result_list,q_opt,inputs);
+
+	analysis(result_list);
 
 }
 
@@ -113,31 +118,55 @@ node_t* yaml_to_node(node_t * list_head, q_ref opt[], input * args)
 	printf("\n");
     FILE * data_file = fopen(args->data_file,"r");
     char line[MAX_LINE_LEN];
-
+	
+	int q = args->question - 1;
     int count = 1;
     node_t * cur;
     fgets(line,MAX_LINE_LEN,data_file);
-    while (count < 5)
+    while (count < 27)
     {		
         char arg_buff[32];
 		char val_buff[32];
         fgets(line,MAX_LINE_LEN,data_file);
-		printf("line: %s",line);
      
-	 	// if (strncmp(line,"-",1) == 0 && count == 1) {
-        //     cur = (node_t*)malloc(sizeof(node_t));
+	 	if (strncmp(line,"-",1) == 0 && count == 1) {
+            cur = (node_t*)malloc(sizeof(node_t));
+        }
 
-        // } else if (strncmp(line,"-",1) == 0 && count != 1) {
-                //TODO: create function to check if node exists and order correctly
-        // }
+		printf("line: %s",line);
+        sscanf(line,"%*c %[a-z_]: %s",arg_buff,val_buff);
 
-        sscanf(line,"%*c %s: %s",arg_buff,val_buff);
-		cur->field1 = strdup(val_buff);
+		if (strcmp(opt[q].field1,arg_buff) == 0) {
+			cur->field1 = strdup(val_buff);
+		} else if (strcmp(opt[q].field2, arg_buff) == 0) {
+			cur->field2 = strdup(val_buff);
+		} else if (strcmp(opt[q].field3, arg_buff) == 0) {
+			cur->field3 = strdup(val_buff);
+		} else if (strcmp(opt[q].field4, arg_buff) == 0) {
+			cur->field4 = strdup(val_buff);
+		}
 
-        printf("%s|%s \n",arg_buff,cur->field1);
-		printf("\n");
-        count++;
+
+        if (count%13 == 0) {
+        	//TODO: create function to check if node exists and order correctly
+			
+			printf("\n");
+    		printf("fields: %s|%s|%s|%s \n",
+					cur->field1,
+					cur->field2,
+					cur->field3,
+					cur->field4);
+			printf("\n");
+
+			list_head = add_front(list_head, cur);
+			cur = (node_t*)malloc(sizeof(node_t));
+		}
+
+		count++;
     }
+	
+	
+	printf("\n");
 
     fclose(data_file);
 
@@ -169,7 +198,7 @@ void init_q_options(q_ref q_opt[])
 	q_opt[2].fields = 4;
 	strncpy(q_opt[2].field1,"to_airport_name\0",sizeof(char)*30);
 	strncpy(q_opt[2].field2, "to_airport_icao_unique_code\0",sizeof(char)*30);
-	strncpy(q_opt[2].field3,"to_aiport_city\0",sizeof(char)*30);
+	strncpy(q_opt[2].field3,"to_airport_city\0",sizeof(char)*30);
 	strncpy(q_opt[2].field4,"to_airport_country\0",sizeof(char)*30);
 }
 
@@ -197,7 +226,7 @@ void inccounter(node_t *p, void *arg)
 void print_node(node_t *p, void *arg)
 {
     char *fmt = (char *)arg;
-    printf(fmt, p->subject);
+    printf(fmt, p->field1);
 }
 
 /**
