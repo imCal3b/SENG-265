@@ -22,7 +22,7 @@ input* read_arguments(int argc, char **argv, input * arguments);
 void init_q_options(q_ref q_opt[]);
 
 // TODO: Make sure to adjust this based on the input files given
-#define MAX_LINE_LEN 80
+#define MAX_LINE_LEN 100
 
 /**
  * @brief The main function and entry point of the program.
@@ -34,6 +34,8 @@ void init_q_options(q_ref q_opt[]);
  */
 int main(int argc, char *argv[])
 {
+    // Initializing Question options
+    //------------------------------
 	q_ref q_opt[3];
 	init_q_options(q_opt);
 
@@ -48,6 +50,8 @@ int main(int argc, char *argv[])
 		printf("\n");
 	}
 
+    // Reading the input arguments from the command line
+    //--------------------------------------------------
     input * inputs = (input*)malloc(sizeof(input));
     inputs = read_arguments(argc, argv, inputs);
 
@@ -55,39 +59,24 @@ int main(int argc, char *argv[])
         inputs->data_file,
         inputs->question,
         inputs->num_outputs);
+
+    // Read yaml file and make node elements for each route
+    //-----------------------------------------------------
+    node_t * result_list = NULL;
+    result_list = yaml_to_node(result_list,q_opt,inputs);
+
 }
 
-void init_q_options(q_ref q_opt[])
-{
-	q_opt[0].fields = 2;
-	strncpy(q_opt[0].field1,"airline_name\0",sizeof(char)*30);
-	strncpy(q_opt[0].field2,"airline_icao_unique_code\0",sizeof(char)*30);
-	strncpy(q_opt[0].field3,"\0",sizeof(char)*30);
-	strncpy(q_opt[0].field4,"\0",sizeof(char)*30);
 
-	q_opt[1].fields = 1;
-	strncpy(q_opt[1].field1,"to_airport_country\0",sizeof(char)*30);
-	strncpy(q_opt[1].field2,"\0",sizeof(char)*30);
-	strncpy(q_opt[1].field3,"\0",sizeof(char)*30);
-	strncpy(q_opt[1].field4,"\0",sizeof(char)*30);
-
-	q_opt[2].fields = 4;
-	strncpy(q_opt[2].field1,"to_airport_name\0",sizeof(char)*30);
-	strncpy(q_opt[2].field2, "to_airport_icao_unique_code\0",sizeof(char)*30);
-	strncpy(q_opt[2].field3,"to_aiport_city\0",sizeof(char)*30);
-	strncpy(q_opt[2].field4,"to_airport_country\0",sizeof(char)*30);
-}
 
 /*
 Function:   looks through the arguments specified when running the program.
 Parameters: int argc - the number of arguments.
             char **argv - a pointer to the array of pointers pointing to the
             specified arguments.
-            int arg_index - keeps track of the index in argv to read from.
-            struct input cur_arg[] - pass through inputs[] to store field
-            and argument parameters.
+            input * arguments - the input arguments struct element.
 return: NA
-PreConditions: must be at least one argument specified at program call.
+PreConditions: Must call the 3 specified command line arguments from tester.
 */
 input* read_arguments(int argc, char **argv, input * arguments) 
 {
@@ -116,6 +105,64 @@ input* read_arguments(int argc, char **argv, input * arguments)
 		printf("\n");
 		return arguments;
     }
+}
+
+node_t* yaml_to_node(node_t * list_head, q_ref opt[], input * args)
+{
+    FILE * data_file = fopen(args->data_file,"r");
+    char line[MAX_LINE_LEN];
+
+    int count = 1;
+    node_t * cur;
+    fgets(line,MAX_LINE_LEN,data_file);
+    while (count < 5)
+    {
+        fgets(line,MAX_LINE_LEN,data_file);
+        if (strncmp(line,"-",1) == 0 && count == 1) {
+            cur = (node_t *)emalloc(sizeof(node_t));
+
+        } else if (strncmp(line,"-",1) == 0 && count != 1) {
+
+        }
+
+        sscanf(line,"%*[:] %s",
+            cur->word);
+
+        printf("read: %s",cur->word);
+
+        count++;
+    }
+
+    fclose(data_file);
+}
+
+/*
+Function:   initializes a struct array element with the required output data
+            fields associated to the question. Each index is initialized to
+            the requirements of a specific question.
+Parameters: q_opt[] - The array of q_ref elements holding the field data.
+return: NA
+PreConditions: NA
+*/
+void init_q_options(q_ref q_opt[])
+{
+	q_opt[0].fields = 2;
+	strncpy(q_opt[0].field1,"airline_name\0",sizeof(char)*30);
+	strncpy(q_opt[0].field2,"airline_icao_unique_code\0",sizeof(char)*30);
+	strncpy(q_opt[0].field3,"\0",sizeof(char)*30);
+	strncpy(q_opt[0].field4,"\0",sizeof(char)*30);
+
+	q_opt[1].fields = 1;
+	strncpy(q_opt[1].field1,"to_airport_country\0",sizeof(char)*30);
+	strncpy(q_opt[1].field2,"\0",sizeof(char)*30);
+	strncpy(q_opt[1].field3,"\0",sizeof(char)*30);
+	strncpy(q_opt[1].field4,"\0",sizeof(char)*30);
+
+	q_opt[2].fields = 4;
+	strncpy(q_opt[2].field1,"to_airport_name\0",sizeof(char)*30);
+	strncpy(q_opt[2].field2, "to_airport_icao_unique_code\0",sizeof(char)*30);
+	strncpy(q_opt[2].field3,"to_aiport_city\0",sizeof(char)*30);
+	strncpy(q_opt[2].field4,"to_airport_country\0",sizeof(char)*30);
 }
 
 // ------------------- GIVEN LIST FUNCTIONS ----------------------
