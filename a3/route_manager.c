@@ -139,11 +139,12 @@ node_t* yaml_to_node(node_t * list_head, q_ref opt[], input * args)
      
 	 	if (strncmp(line,"-",1) == 0 && count == 1) {
             cur = (node_t*)malloc(sizeof(node_t));
-			cur->statistic = 0;
+			cur->statistic = 1;
+			cur->next = NULL;
         }
 
 		// printf("line: %s",line);
-        sscanf(line,"%*c %[a-z_]: %s",arg_buff,val_buff);
+        sscanf(line,"%*c %[a-z_]: %[^\t\n]",arg_buff,val_buff);
 
 		if (strcmp(opt[q].field1,arg_buff) == 0) cur->field1 = strdup(val_buff);
 		else if (strcmp(opt[q].field2, arg_buff) == 0) cur->field2 = strdup(val_buff);
@@ -152,19 +153,23 @@ node_t* yaml_to_node(node_t * list_head, q_ref opt[], input * args)
 
 
         if (count%13 == 0) {
-			// printf("\n");
-    		// printf("fields: %s|%s|%s|%s \n",
-			// 		cur->field1,
-			// 		cur->field2,
-			// 		cur->field3,
-			// 		cur->field4);
-			// printf("\n");
+			if ((args->question == 1 && strcmp(cur->field3,"Canada") == 0) || args->question != 1) {	
+					printf("line | %s\n",line);
+    				printf("fields: %s|%s|%s|%s \n",
+						cur->field1,
+			 			cur->field2,
+			 			cur->field3,
+			 			cur->field4);
+					printf("\n");
 
-			if ((q == 1 && strcmp(cur->field3,"Canada") == 0) || q != 1) list_head = order_sort(list_head, cur);
-			else free(cur);
+					list_head = order_sort(list_head, cur);
+			} else free(cur);
+
+			// printf("here\n");
 
 			cur = (node_t*)malloc(sizeof(node_t));
-			cur->statistic = 0;
+			cur->statistic = 1;
+			cur->next = NULL;
 		}
 
 		count++;
@@ -231,7 +236,8 @@ void inccounter(node_t *p, void *arg)
 void print_node(node_t *p, void *arg)
 {
     char *fmt = (char *)arg;
-    printf(fmt, p->field1);
+    //printf(fmt, p->field2);
+	printf("%s | %d\n",p->field1,p->statistic);
 }
 
 /**
