@@ -12,7 +12,18 @@
 #include "emalloc.h"
 #include "list.h"
 
-node_t * order_sort(node_t* head,node_t* new)
+/*
+Function:   Takes in a list via a head pointer (which points to the head node) and
+            a new node to be inserted in the list. 
+            order_sort() starts by checking if field1 from cur and new are matching,
+            if so, increment the counter, remove and set cur as new, and re-insert node
+            into the list. If no match, simply insert node into the list.
+Parameters: node_t * head - the node that defines the head of the list.
+            node_t * new - the new node to be inserted into the ordered list. 
+return:     node_t * - returns a node_t pointer to the node at the head of the list.
+PreConditions: NA
+*/
+node_t * order_sort(node_t* head, node_t* new)
 {
     if (head == NULL) {
         new->next = NULL;

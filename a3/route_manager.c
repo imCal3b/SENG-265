@@ -21,6 +21,7 @@ void analysis(node_t *l);
 input* read_arguments(int argc, char **argv, input * arguments); 
 void init_q_options(q_ref q_opt[]);
 node_t* yaml_to_node(node_t * list_head, q_ref opt[], input * args);
+node_t* result_list_slice(node_t * head, int num_el);
 
 // TODO: Make sure to adjust this based on the input files given
 #define MAX_LINE_LEN 100
@@ -70,10 +71,15 @@ int main(int argc, char *argv[])
     result_list = yaml_to_node(result_list,q_opt,inputs);
 
 	//TODO: function to take in result_list and return new list with 'N' elements
+	result_list = result_list_slice(result_list, inputs->num_outputs);
 
 	analysis(result_list);
 
 }
+
+// *********************************************************************
+// ************************ END OF MAIN ********************************
+// *********************************************************************
 
 /*
 Function:   looks through the arguments specified when running the program.
@@ -95,6 +101,8 @@ input* read_arguments(int argc, char **argv, input * arguments)
         for (int i=1;i<4;i++)
         {
 			char * value = (char*)malloc(sizeof(char) * 32);
+			if (value == NULL) exit(EXIT_FAILURE); // malloc safety
+
             sscanf(*(argv+i),"--%[A-Z]=%[^\t\n]",
                 field,
                 value);
@@ -141,6 +149,7 @@ node_t* yaml_to_node(node_t * list_head, q_ref opt[], input * args)
      
 	 	if (strncmp(line,"-",1) == 0 && count == 1) {
             cur = (node_t*)malloc(sizeof(node_t));
+			if (cur == NULL) exit(EXIT_FAILURE); // malloc safety
 			cur->statistic = 1;
 			cur->next = NULL;
         }
@@ -156,20 +165,13 @@ node_t* yaml_to_node(node_t * list_head, q_ref opt[], input * args)
 
         if (count%13 == 0) {
 			if ((args->question == 1 && strcmp(cur->field3,"Canada") == 0) || args->question != 1) {	
-					// printf("line | %s\n",line);
-    				// printf("fields: %s|%s|%s|%s \n",
-					// 	cur->field1,
-			 		// 	cur->field2,
-			 		// 	cur->field3,
-			 		// 	cur->field4);
-					// printf("\n");
+				// insert new node into the list
+				list_head = order_sort(list_head, cur);
 
-					list_head = order_sort(list_head, cur);
 			} else free(cur);
 
-			// printf("here\n");
-
 			cur = (node_t*)malloc(sizeof(node_t));
+			if (cur == NULL) exit(EXIT_FAILURE); // malloc safety
 			cur->statistic = 1;
 			cur->next = NULL;
 		}
@@ -177,12 +179,19 @@ node_t* yaml_to_node(node_t * list_head, q_ref opt[], input * args)
 		count++;
     }
 	
-	
-	// printf("\n");
-
     fclose(data_file);
-
 	return list_head;
+}
+
+node_t* result_list_slice(node_t * head, int num_el)
+{
+	node_t * cur = head;
+
+	for (int i=1; i < num_el; i++) {cur = cur->next;}
+
+	cur->next = NULL;
+
+	return head;
 }
 
 /*

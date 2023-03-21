@@ -6,6 +6,10 @@
 
 #define MAX_WORD_LEN 50
 
+/*
+q_ref | a struct representing the required input fields
+        for a specified question.
+*/
 typedef struct q_ref
 {
 	int fields;
@@ -15,6 +19,9 @@ typedef struct q_ref
 	char field4[30];
 } q_ref;
 
+/*
+input | a struct representing the inputs specified at program call.
+*/
 typedef struct input
 {
     char * data_file;
