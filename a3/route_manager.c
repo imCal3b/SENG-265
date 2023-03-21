@@ -69,6 +69,8 @@ int main(int argc, char *argv[])
     node_t * result_list = NULL;
     result_list = yaml_to_node(result_list,q_opt,inputs);
 
+	//TODO: function to take in result_list and return new list with 'N' elements
+
 	analysis(result_list);
 
 }
@@ -154,13 +156,13 @@ node_t* yaml_to_node(node_t * list_head, q_ref opt[], input * args)
 
         if (count%13 == 0) {
 			if ((args->question == 1 && strcmp(cur->field3,"Canada") == 0) || args->question != 1) {	
-					printf("line | %s\n",line);
-    				printf("fields: %s|%s|%s|%s \n",
-						cur->field1,
-			 			cur->field2,
-			 			cur->field3,
-			 			cur->field4);
-					printf("\n");
+					// printf("line | %s\n",line);
+    				// printf("fields: %s|%s|%s|%s \n",
+					// 	cur->field1,
+			 		// 	cur->field2,
+			 		// 	cur->field3,
+			 		// 	cur->field4);
+					// printf("\n");
 
 					list_head = order_sort(list_head, cur);
 			} else free(cur);
@@ -176,7 +178,7 @@ node_t* yaml_to_node(node_t * list_head, q_ref opt[], input * args)
     }
 	
 	
-	printf("\n");
+	// printf("\n");
 
     fclose(data_file);
 
