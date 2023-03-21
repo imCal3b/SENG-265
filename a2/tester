@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #!/bin/bash
 chmod u+x validator
 if (($# < 1))
@@ -6,3 +7,13 @@ then
 else
     python validator "$1"
 fi
+=======
+#!/bin/bash
+chmod u+x validator
+if (($# < 1))
+then
+    python validator
+else
+    python validator "$1"
+fi
+>>>>>>> 8249c712c7c8ff9af96f846a99bc5e682bfbed88
