@@ -30,8 +30,6 @@ node_t * order_sort(node_t* head, node_t* new)
         return new;
     }
 
-	int loop_break = 0;
-
     node_t * cur;
     node_t * prev = NULL;
     int match = 0;
@@ -49,6 +47,7 @@ node_t * order_sort(node_t* head, node_t* new)
 
             new = cur;
             cur = head;
+			prev = NULL;
         }
 
         if (new->statistic < cur->statistic) {
@@ -58,8 +57,6 @@ node_t * order_sort(node_t* head, node_t* new)
 				prev = cur;
 			} else break;
         } else break;
-		
-		if (loop_break == 20) break;
     }
 
     // set new node to point to the next

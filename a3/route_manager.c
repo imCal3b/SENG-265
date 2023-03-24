@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
         inputs->question,
         inputs->num_outputs);
 
-	printf("%s|%s|%s|%s \n",
+	printf("Fields: %s|%s|%s|%s \n\n",
 					q_opt[inputs->question-1].field1,
 					q_opt[inputs->question-1].field2,
 					q_opt[inputs->question-1].field3,
@@ -128,7 +128,6 @@ PreConditions: NA
 */
 node_t* yaml_to_node(node_t * list_head, q_ref opt[], input * args)
 {
-	printf("\nreading yaml...\n");
     FILE * data_file = fopen(args->data_file,"r");
     char line[MAX_LINE_LEN];
 	
@@ -149,7 +148,7 @@ node_t* yaml_to_node(node_t * list_head, q_ref opt[], input * args)
 			cur->next = NULL;
         }
 
-		printf("line: %s",line);
+		// printf("line: %s",line);
         sscanf(line,"%*c %[a-z_]: %[^\t\n]",arg_buff,val_buff);
 
 		if (strcmp(opt[q].field1,arg_buff) == 0) cur->field1 = strdup(val_buff);
@@ -161,12 +160,10 @@ node_t* yaml_to_node(node_t * list_head, q_ref opt[], input * args)
         if (count%13 == 0) {
 			if ((args->question == 1 && strcmp(cur->field3,"Canada") == 0) || args->question != 1) {	
 				// insert new node into the list
-				printf("insert node to list\n");
 				list_head = order_sort(list_head, cur);
 
 			} else free(cur);
 
-			printf("malloc new node...\n");
 			cur = (node_t*)malloc(sizeof(node_t));
 			if (cur == NULL) exit(EXIT_FAILURE); // malloc safety
 			cur->statistic = 1;
