@@ -44,17 +44,6 @@ int main(int argc, char *argv[])
 	q_ref q_opt[3];
 	init_q_options(q_opt);
 
-	for (int i=0;i<3;i++)
-	{
-		printf("Q%d | #Fields: %d \n",i+1,q_opt[i].fields);
-		printf("%s|%s|%s|%s \n",
-						q_opt[i].field1,
-						q_opt[i].field2,
-						q_opt[i].field3,
-						q_opt[i].field4);
-		printf("\n");
-	}
-
     // Reading the input arguments from the command line
     //--------------------------------------------------
     input * inputs = (input*)malloc(sizeof(input));
@@ -64,6 +53,12 @@ int main(int argc, char *argv[])
         inputs->data_file,
         inputs->question,
         inputs->num_outputs);
+
+	printf("%s|%s|%s|%s \n",
+					q_opt[inputs->question-1].field1,
+					q_opt[inputs->question-1].field2,
+					q_opt[inputs->question-1].field3,
+					q_opt[inputs->question-1].field4);
 
     // Read yaml file and make node elements for each route
     //-----------------------------------------------------
@@ -133,7 +128,7 @@ PreConditions: NA
 */
 node_t* yaml_to_node(node_t * list_head, q_ref opt[], input * args)
 {
-	printf("\n");
+	printf("\nreading yaml...\n");
     FILE * data_file = fopen(args->data_file,"r");
     char line[MAX_LINE_LEN];
 	
@@ -154,7 +149,7 @@ node_t* yaml_to_node(node_t * list_head, q_ref opt[], input * args)
 			cur->next = NULL;
         }
 
-		// printf("line: %s",line);
+		printf("line: %s",line);
         sscanf(line,"%*c %[a-z_]: %[^\t\n]",arg_buff,val_buff);
 
 		if (strcmp(opt[q].field1,arg_buff) == 0) cur->field1 = strdup(val_buff);
@@ -166,6 +161,7 @@ node_t* yaml_to_node(node_t * list_head, q_ref opt[], input * args)
         if (count%13 == 0) {
 			if ((args->question == 1 && strcmp(cur->field3,"Canada") == 0) || args->question != 1) {	
 				// insert new node into the list
+				printf("new node\n");
 				list_head = order_sort(list_head, cur);
 
 			} else free(cur);
