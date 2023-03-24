@@ -133,13 +133,40 @@ def validate_tests(execution_commands: list, test: str) -> None:
             expected_data = load_csv(open(os.path.join(TEST_FILES_FOLDER, f'test0{test_int}.csv')))
             # obtain the differences
             result = compare(produced_data, expected_data)
+            order_differences: bool = False
             # compare
             if len(result['added']) > 0 or len(result['removed']) > 0 or len(result['changed']) > 0 or len(
                     result['columns_added']) > 0 or len(result['columns_removed']) > 0:
                 test_pass = False
+            else:
+                # validate order
+                produced_elements: list[tuple] = []
+                expected_elements: list[tuple] = []
+                try:
+                    # produced
+                    for key in produced_data.keys():
+                        value: dict = produced_data[key]
+                        produced_elements.append((value['subject'], value['statistic']))
+                    # expected
+                    for key in expected_data.keys():
+                        value: dict = expected_data[key]
+                        expected_elements.append((value['subject'], value['statistic']))
+                    # verify order
+                    for j in range(len(produced_elements)):
+                        produced: tuple = produced_elements[j]
+                        expected: tuple = expected_elements[j]
+                        if not produced == expected:
+                            test_pass = False
+                            order_differences = True
+                            break
+                except:
+                    test_pass = False
         print_message(is_error=False, message=f'TEST PASSED: {test_pass}')
         if not test_pass and os.path.isfile(required):
-            print_message(is_error=False, message=f'DIFFERENCES: {result}')
+            if not order_differences:
+                print_message(is_error=False, message=f'DIFFERENCES: {result}')
+            else:
+                print_message(is_error=False, message=f'DIFFERENCES: wrong order in rows.')
         if test_pass:
             tests_passed += 1
     print_message(is_error=False, message=separator + '--------')
