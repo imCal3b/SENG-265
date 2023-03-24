@@ -24,7 +24,7 @@ node_t* yaml_to_node(node_t * list_head, q_ref opt[], input * args);
 node_t* result_list_slice(node_t * head, int num_el);
 
 // TODO: Make sure to adjust this based on the input files given
-#define MAX_LINE_LEN 100
+#define MAX_LINE_LEN 150
 
 /**
  * @brief The main function and entry point of the program.
@@ -138,8 +138,8 @@ node_t* yaml_to_node(node_t * list_head, q_ref opt[], input * args)
     fgets(line,MAX_LINE_LEN,data_file);
     while (fgets(line,MAX_LINE_LEN,data_file))
     {		
-        char arg_buff[32];
-		char val_buff[32];
+        char arg_buff[35];
+		char val_buff[35];
         
      
 	 	if (strncmp(line,"-",1) == 0 && count == 1) {
@@ -161,11 +161,12 @@ node_t* yaml_to_node(node_t * list_head, q_ref opt[], input * args)
         if (count%13 == 0) {
 			if ((args->question == 1 && strcmp(cur->field3,"Canada") == 0) || args->question != 1) {	
 				// insert new node into the list
-				printf("new node\n");
+				printf("insert node to list\n");
 				list_head = order_sort(list_head, cur);
 
 			} else free(cur);
 
+			printf("malloc new node...\n");
 			cur = (node_t*)malloc(sizeof(node_t));
 			if (cur == NULL) exit(EXIT_FAILURE); // malloc safety
 			cur->statistic = 1;
