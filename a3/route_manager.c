@@ -236,8 +236,10 @@ node_t* reOrder_list(node_t * head)
 	node_t * cur;
 	for (cur = head; head != NULL; cur = cur->next)
 	{
-		new_list = add_front(new_list, cur);
+		printf("%s\n", cur->field1);
+		//new_list = add_end(new_list, cur);
 	}
+	printf("end reorder\n");
 	return new_list;
 }
 

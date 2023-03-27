@@ -50,6 +50,7 @@ node_t * order_sort(node_t* head, node_t* new, int sort_type)
             else return cur; // already at head of list, just return
 			
             new = cur;
+			new->next = NULL;
             cur = head;
 			prev = NULL;
         }
