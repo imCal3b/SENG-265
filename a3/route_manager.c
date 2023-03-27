@@ -24,6 +24,7 @@ node_t* yaml_to_node(node_t * list_head, q_ref opt[], input * args);
 node_t* result_list_slice(node_t * head, int num_el);
 void free_mem(node_t * cur);
 node_t* reOrder_list(node_t * head);
+void format_and_print(node_t * head, input * inputs);
 
 // TODO: Make sure to adjust this based on the input files given
 #define MAX_LINE_LEN 150
@@ -38,9 +39,6 @@ node_t* reOrder_list(node_t * head);
  */
 int main(int argc, char *argv[])
 {
-	printf("\n-----------------------\n");
-	printf("----- PROG START ------\n");
-	printf("-----------------------\n");
     // Initializing Question options
     //------------------------------
 	q_ref q_opt[3];
@@ -51,29 +49,17 @@ int main(int argc, char *argv[])
     input * inputs = (input*)malloc(sizeof(input));
     inputs = read_arguments(argc, argv, inputs);
 
-    printf("DATA: %s \nQUESTION: %d \nN: %d \n",
-        inputs->data_file,
-        inputs->question,
-        inputs->num_outputs);
-
-	printf("Fields: %s|%s|%s|%s \n\n",
-					q_opt[inputs->question-1].field1,
-					q_opt[inputs->question-1].field2,
-					q_opt[inputs->question-1].field3,
-					q_opt[inputs->question-1].field4);
-
     // Read yaml file and make node elements for each route
     //-----------------------------------------------------
     node_t * result_list = NULL;
     result_list = yaml_to_node(result_list,q_opt,inputs);
 
-	//TODO: function to take in result_list and return new list with 'N' elements
 	if (q_opt[inputs->question-1].sort_type == 0) result_list = reOrder_list(result_list);
 	result_list = result_list_slice(result_list, inputs->num_outputs);
 
 	format_and_print(result_list, inputs);
 
-	analysis(result_list);
+	//analysis(result_list);
 
 }
 
@@ -107,16 +93,11 @@ input* read_arguments(int argc, char **argv, input * arguments)
                 field,
                 value);
 			
-			printf("Field: %s Value: %s \n",
-							field,
-							value);
-
             if (strcmp(field,"DATA") == 0) arguments->data_file = strdup(value);
 			else if (strcmp(field,"QUESTION") == 0) arguments->question = atoi(value);
 			else if (strcmp(field,"N") == 0) arguments->num_outputs = atoi(value);
      
 		}
-		printf("\n");
 		return arguments;
     }
 }
@@ -164,8 +145,6 @@ node_t* yaml_to_node(node_t * list_head, q_ref opt[], input * args)
 
         if (count%13 == 0) {
 			if ((args->question == 1 && strcmp(cur->field3,"Canada") == 0) || args->question != 1) {	
-				// insert new node into the list
-				// TODO: add sort type switch case to order sort function and add parameter
 				list_head = order_sort(list_head, cur, opt[q].sort_type);
 
 			} else free(cur);
@@ -200,14 +179,11 @@ node_t* result_list_slice(node_t * head, int num_el)
 
 	node_t * free_cur = cur->next;
 	
-	printf("freeing memory...\n");
 	free_mem(free_cur);
-	printf("memory freed!\n");
-
 	cur->next = NULL;
 
 	return head;
-}
+}1
 
 /*
 Function:   frees the memory of the unused elements in the sorted list.
@@ -238,8 +214,8 @@ node_t* reOrder_list(node_t * head)
 	node_t * cur;
 	for (cur = head; head != NULL; cur = cur->next)
 	{
-		printf("%s\n", cur->field1);
-		//new_list = add_end(new_list, cur);
+		printf("%p\n", cur->next);
+		new_list = add_end(new_list, cur);
 	}
 	printf("end reorder\n");
 	return new_list;
@@ -248,22 +224,23 @@ node_t* reOrder_list(node_t * head)
 void format_and_print(node_t * head, input * inputs)
 {
 	FILE * result = fopen("output.csv","w");
-	char * line;
+	char line[80];
 	node_t * cur;
+	fputs("subject,statistic\n",result);
 	for (cur = head; cur != NULL; cur = cur->next)
 	{
-		char * temp_str;
+		char temp_str[80];
 		if (inputs->question == 1) {
 			sprintf(temp_str,"%s (%s)",cur->field1,cur->field2);
 			cur->subject = strdup(temp_str);
 		} else if (inputs->question == 2) {
 			cur->subject = cur->field1;
 		} else if (inputs->question == 3) {
-			sprintf(temp_str,"%s (%s), %s, %s",cur->field1,cur->field2,cur->field3,cur->field4);
+			sprintf(temp_str,"\"%s (%s), %s, %s\"",cur->field1,cur->field2,cur->field3,cur->field4);
 			cur->subject = strdup(temp_str);
 		}
 
-		sprintf(line,"%s,%d",cur->subject,cur->statistic);
+		sprintf(line,"%s,%d\n",cur->subject,cur->statistic);
 		fputs(line,result);
 	}
 
