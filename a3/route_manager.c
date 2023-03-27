@@ -54,9 +54,13 @@ int main(int argc, char *argv[])
     node_t * result_list = NULL;
     result_list = yaml_to_node(result_list,q_opt,inputs);
 
+	// Finding the first 'N' nodes to return
+	//--------------------------------------
 	if (q_opt[inputs->question-1].sort_type == 0) result_list = reOrder_list(result_list);
 	result_list = result_list_slice(result_list, inputs->num_outputs);
 
+	// Printing the nodes to a csv file
+	// --------------------------------
 	format_and_print(result_list, inputs);
 
 	//analysis(result_list);
@@ -118,7 +122,7 @@ node_t* yaml_to_node(node_t * list_head, q_ref opt[], input * args)
     char line[MAX_LINE_LEN];
 	
 	int q = args->question - 1;
-    int count = 1; //27
+    int count = 1;
     node_t * cur;
     fgets(line,MAX_LINE_LEN,data_file);
     while (fgets(line,MAX_LINE_LEN,data_file))
@@ -134,7 +138,6 @@ node_t* yaml_to_node(node_t * list_head, q_ref opt[], input * args)
 			cur->next = NULL;
         }
 
-		// printf("line: %s",line);
         sscanf(line,"%*c %[a-z_]: %[^\t\n]",arg_buff,val_buff);
 
 		if (strcmp(opt[q].field1,arg_buff) == 0) cur->field1 = strdup(val_buff);
@@ -183,7 +186,7 @@ node_t* result_list_slice(node_t * head, int num_el)
 	cur->next = NULL;
 
 	return head;
-}1
+}
 
 /*
 Function:   frees the memory of the unused elements in the sorted list.
@@ -208,6 +211,13 @@ void free_mem(node_t * cur)
 	}
 }
 
+/*
+Function:   re-orders the list of elements such that they are ordered
+			smallest to largest.
+Parameters: node_t * head - Pointer node to the head of a list to be re-ordered.
+return:     node_t* - returns pointer to the new head node of the modified list.
+PreConditions: NA
+*/
 node_t* reOrder_list(node_t * head)
 {
 	node_t * new_list = NULL;
@@ -221,6 +231,14 @@ node_t* reOrder_list(node_t * head)
 	return new_list;
 }
 
+/*
+Function:   Takes in the sliced list of elements and prints the contents
+			to a csv file.
+Parameters: node_t * head - the head node of a the list.
+			input * inputs - the inputs specified at program call.
+return:     NA
+PreConditions: NA
+*/
 void format_and_print(node_t * head, input * inputs)
 {
 	FILE * result = fopen("output.csv","w");

@@ -30,8 +30,6 @@ node_t * order_sort(node_t* head, node_t* new, int sort_type)
         return new;
     }
 
-	//if (sort_type == 0) return rev_order(head, new);
-
     node_t * cur;
     node_t * prev = NULL;
     int match = 0;
@@ -66,52 +64,6 @@ node_t * order_sort(node_t* head, node_t* new, int sort_type)
 			if (strcmp(new->field1, cur->field1) < 0) {
 				prev = cur;
 			} else break;
-        } else break;
-    }
-
-    // set new node to point to the next
-    new->next = cur;
-
-    if (prev == NULL) {
-        // if the new node is the head of the list
-        return new;
-    } else {
-        // if new node is in middle/end of list
-        prev->next = new;
-        return head;
-    }
-}
-
-node_t * rev_order(node_t* head, node_t* new)
-{
-    node_t * cur;
-    node_t * prev = NULL;
-    for (cur = head; cur != NULL; cur = cur->next)
-    {
-		printf("checking node: %s | %s\n", new->field1,cur->field1);
-        if (strcmp(new->field1,cur->field1) == 0) {
-            cur->statistic++;
-            
-            if (prev == NULL) head = cur->next;
-            else prev->next = cur->next;
- 
-            new = cur;
-            cur = head;
-			prev = NULL;  
-            break;        
-        }
-		prev = cur;
-    }
-
-
-    for (cur = head; cur != NULL; cur = cur->next)
-    {
-        if (new->statistic > cur->statistic) {
-                prev = cur;
-        } else if (new->statistic == cur->statistic) {
-                if (strcmp(new->field1, cur->field1) > 0) {
-                    prev = cur;
-                } else break;
         } else break;
     }
 
