@@ -22,6 +22,7 @@ input* read_arguments(int argc, char **argv, input * arguments);
 void init_q_options(q_ref q_opt[]);
 node_t* yaml_to_node(node_t * list_head, q_ref opt[], input * args);
 node_t* result_list_slice(node_t * head, int num_el);
+void free_mem(node_t * cur);
 
 // TODO: Make sure to adjust this based on the input files given
 #define MAX_LINE_LEN 150
@@ -160,7 +161,8 @@ node_t* yaml_to_node(node_t * list_head, q_ref opt[], input * args)
         if (count%13 == 0) {
 			if ((args->question == 1 && strcmp(cur->field3,"Canada") == 0) || args->question != 1) {	
 				// insert new node into the list
-				list_head = order_sort(list_head, cur);
+				// TODO: add sort type switch case to order sort function and add parameter
+				list_head = order_sort(list_head, cur, opt[q].sort_type);
 
 			} else free(cur);
 
@@ -177,15 +179,50 @@ node_t* yaml_to_node(node_t * list_head, q_ref opt[], input * args)
 	return list_head;
 }
 
+/*
+Function:   Takes the sorted list as input and returns the head pointer of a new list 
+			containing the specified number of elements.
+Parameters: node_t * head - The node pointing to the head of the list.
+			int num_el - The specified size of the return list.
+return:     node_t * - returns a node_t pointer to the node at the head of the list.
+PreConditions: NA
+*/
 node_t* result_list_slice(node_t * head, int num_el)
 {
-	node_t * cur = head;
+	if (num_el == 0) return NULL;
 
+	node_t * cur = head;
 	for (int i=1; i < num_el; i++) {cur = cur->next;}
+
+	node_t * free_cur = cur->next;
+	free_mem(free_cur);
 
 	cur->next = NULL;
 
 	return head;
+}
+
+/*
+Function:   frees the memory of the unused elements in the sorted list.
+Parameters: node_t * cur - Pointer to the first unused node in the sorted list.
+return:     NA
+PreConditions: NA
+*/
+void free_mem(node_t * cur)
+{
+	node_t * temp = NULL;
+	while (cur != NULL)
+	{
+		temp = cur->next;
+		free(cur->field1);
+		free(cur->field2);
+		free(cur->field3);
+		free(cur->field4);
+		free(cur->subject);
+		free(cur);
+
+		cur = temp;
+	}
 }
 
 /*
@@ -198,19 +235,19 @@ PreConditions: NA
 */
 void init_q_options(q_ref q_opt[])
 {
-	q_opt[0].fields = 2;
+	q_opt[0].sort_type = 1;
 	strncpy(q_opt[0].field1,"airline_name\0",sizeof(char)*30);
 	strncpy(q_opt[0].field2,"airline_icao_unique_code\0",sizeof(char)*30);
 	strncpy(q_opt[0].field3,"to_airport_country\0",sizeof(char)*30);
 	strncpy(q_opt[0].field4,"\0",sizeof(char)*30);
 
-	q_opt[1].fields = 1;
+	q_opt[1].sort_type = 0;
 	strncpy(q_opt[1].field1,"to_airport_country\0",sizeof(char)*30);
 	strncpy(q_opt[1].field2,"\0",sizeof(char)*30);
 	strncpy(q_opt[1].field3,"\0",sizeof(char)*30);
 	strncpy(q_opt[1].field4,"\0",sizeof(char)*30);
 
-	q_opt[2].fields = 4;
+	q_opt[2].sort_type = 1;
 	strncpy(q_opt[2].field1,"to_airport_name\0",sizeof(char)*30);
 	strncpy(q_opt[2].field2, "to_airport_icao_unique_code\0",sizeof(char)*30);
 	strncpy(q_opt[2].field3,"to_airport_city\0",sizeof(char)*30);

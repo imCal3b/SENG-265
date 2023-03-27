@@ -12,7 +12,7 @@ q_ref | a struct representing the required input fields
 */
 typedef struct q_ref
 {
-	int fields;
+	int sort_type;
 	char field1[30];
 	char field2[30];
 	char field3[30];
@@ -46,7 +46,7 @@ typedef struct node_t
 /**
  * Function protypes associated with a linked list.
  */
-node_t * order_sort(node_t* head,node_t* new);
+node_t * order_sort(node_t* head,node_t* new, int sort_type);
 
 node_t *new_node(char *val);
 node_t *add_front(node_t *, node_t *);
