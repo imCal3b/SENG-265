@@ -23,6 +23,7 @@ void init_q_options(q_ref q_opt[]);
 node_t* yaml_to_node(node_t * list_head, q_ref opt[], input * args);
 node_t* result_list_slice(node_t * head, int num_el);
 void free_mem(node_t * cur);
+node_t* reOrder_list(node_t * head);
 
 // TODO: Make sure to adjust this based on the input files given
 #define MAX_LINE_LEN 150
@@ -67,6 +68,7 @@ int main(int argc, char *argv[])
     result_list = yaml_to_node(result_list,q_opt,inputs);
 
 	//TODO: function to take in result_list and return new list with 'N' elements
+	if (q_opt[inputs->question-1].sort_type == 0) result_list = reOrder_list(result_list);
 	result_list = result_list_slice(result_list, inputs->num_outputs);
 
 	analysis(result_list);
@@ -226,6 +228,17 @@ void free_mem(node_t * cur)
 
 		cur = temp;
 	}
+}
+
+node_t* reOrder_list(node_t * head)
+{
+	node_t * new_list = NULL;
+	node_t * cur;
+	for (cur = head; head != NULL; cur = cur->next)
+	{
+		new_list = add_front(new_list, cur);
+	}
+	return new_list;
 }
 
 /*
