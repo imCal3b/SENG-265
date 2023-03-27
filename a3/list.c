@@ -83,7 +83,7 @@ node_t * rev_order(node_t* head, node_t* new)
     node_t * prev = NULL;
     for (cur = head; cur != NULL; cur = cur->next)
     {
-		//printf("checking node: %s | %s\n", new->field1,cur->field1);
+		printf("checking node: %s | %s\n", new->field1,cur->field1);
         if (strcmp(new->field1,cur->field1) == 0) {
             cur->statistic++;
             
