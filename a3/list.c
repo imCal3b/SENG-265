@@ -30,7 +30,7 @@ node_t * order_sort(node_t* head, node_t* new, int sort_type)
         return new;
     }
 
-	if (sort_type == 0) return rev_order(head, new);
+	//if (sort_type == 0) return rev_order(head, new);
 
     node_t * cur;
     node_t * prev = NULL;
@@ -57,10 +57,14 @@ node_t * order_sort(node_t* head, node_t* new, int sort_type)
         // sort order largest to smallest in alphabetical order
         if (new->statistic < cur->statistic) {
             prev = cur;
-        } else if (new->statistic == cur->statistic) {
+        } else if (new->statistic == cur->statistic && sort_type == 1) {
             if (strcmp(new->field1, cur->field1) > 0) {
                 prev = cur;
             } else break;
+		} else if (new->statistic == cur->statistic && sort_type == 0) {
+			if (strcmp(new->field1, cur->field1) < 0) {
+				prev = cur;
+			} else break;
         } else break;
     }
 
