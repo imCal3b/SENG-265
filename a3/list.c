@@ -30,40 +30,53 @@ node_t * order_sort(node_t* head, node_t* new, int sort_type)
         return new;
     }
 
+	if (sort_type == 0) {
+		
+	}
+
     node_t * cur;
     node_t * prev = NULL;
     int match = 0;
+	int rev_match = 0;
     for (cur = head; cur != NULL; cur = cur->next)
     {
+		printf("new: %s | cur: %s\n",new->field1, cur->field1);
 		// if item is already in list
         if (strcmp(new->field1,cur->field1) == 0 && match == 0)
         {
+			printf("match! %s | %s\n",new->field1,cur->field1);
             cur->statistic++;
             match = 1;
-
-            // remove cur element from list to be re-sorted
-            if (prev != NULL) prev->next = cur->next;
-            else return cur; // already at head of list, just return
-
+			
+			if (sort_type == 0) {
+				if (prev == NULL) head = cur->next;
+				else if (cur->next == NULL) return head;
+				else prev->next = cur->next;
+			
+			} else if (sort_type == 1) {
+            	// remove cur element from list to be re-sorted
+            	if (prev != NULL) prev->next = cur->next;
+            	else return cur; // already at head of list, just return
+			}
+			
+			rev_match = 1;
             new = cur;
             cur = head;
 			prev = NULL;
         }
 
-        switch (sort_type)
-        {
-            case 0:
+
+            if (sort_type == 0 && rev_match == 1) {
             // sort order smallest to largest in alphabetical order
                 if (new->statistic > cur->statistic) {
                     prev = cur;
                 } else if (new->statistic == cur->statistic) {
-                    if (strcmp(new->field1, cur->field1) > 0) {
-                        prev = cur;
+					if (strcmp(new->field1, cur->field1) > 0) {
+						prev = cur;
                     } else break;
-                } else break;
-                break; // exit case 0
+            	} else break;
 
-            case 1:
+     		} else if (sort_type == 1) {
             // sort order largest to smallest in alphabetical order
                 if (new->statistic < cur->statistic) {
                     prev = cur;
@@ -72,12 +85,13 @@ node_t * order_sort(node_t* head, node_t* new, int sort_type)
                         prev = cur;
                     } else break;
                 } else break;
-
-                break; // exit case 1
-
-            default:
-                break; // do nothing
-        }
+			}
+ 		
+		if (sort_type == 0 && cur->next == NULL) {
+			rev_match = 1;
+			cur = head;
+			prev = NULL;
+		}
     }
 
     // set new node to point to the next

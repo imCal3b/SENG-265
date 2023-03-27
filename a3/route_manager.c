@@ -195,7 +195,10 @@ node_t* result_list_slice(node_t * head, int num_el)
 	for (int i=1; i < num_el; i++) {cur = cur->next;}
 
 	node_t * free_cur = cur->next;
+	
+	printf("freeing memory...\n");
 	free_mem(free_cur);
+	printf("memory freed!\n");
 
 	cur->next = NULL;
 
