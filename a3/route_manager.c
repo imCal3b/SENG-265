@@ -71,6 +71,8 @@ int main(int argc, char *argv[])
 	if (q_opt[inputs->question-1].sort_type == 0) result_list = reOrder_list(result_list);
 	result_list = result_list_slice(result_list, inputs->num_outputs);
 
+	format_and_print(result_list, inputs);
+
 	analysis(result_list);
 
 }
@@ -241,6 +243,31 @@ node_t* reOrder_list(node_t * head)
 	}
 	printf("end reorder\n");
 	return new_list;
+}
+
+void format_and_print(node_t * head, input * inputs)
+{
+	FILE * result = fopen("output.csv","w");
+	char * line;
+	node_t * cur;
+	for (cur = head; cur != NULL; cur = cur->next)
+	{
+		char * temp_str;
+		if (inputs->question == 1) {
+			sprintf(temp_str,"%s (%s)",cur->field1,cur->field2);
+			cur->subject = strdup(temp_str);
+		} else if (inputs->question == 2) {
+			cur->subject = cur->field1;
+		} else if (inputs->question == 3) {
+			sprintf(temp_str,"%s (%s), %s, %s",cur->field1,cur->field2,cur->field3,cur->field4);
+			cur->subject = strdup(temp_str);
+		}
+
+		sprintf(line,"%s,%d",cur->subject,cur->statistic);
+		fputs(line,result);
+	}
+
+	fclose(result);
 }
 
 /*
