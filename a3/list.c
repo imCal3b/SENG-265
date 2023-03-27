@@ -96,16 +96,18 @@ node_t * rev_order_check(node_t* head, node_t* new)
 {
     node_t * cur;
     node_t * prev = NULL;
-    int match = 0;
     for (cur = head; cur != NULL; cur = cur->next)
     {
+		//printf("checking node: %s | %s\n", new->field1,cur->field1);
         if (strcmp(new->field1,cur->field1) == 0) {
             if (prev == NULL) head = cur->next;
             else prev->next = cur->next;
-
+			
+			//printf("found!!!\n");
             cur->statistic++;
             return cur;            
         }
+		prev = cur;
     }
     return new;
 }
