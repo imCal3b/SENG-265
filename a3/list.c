@@ -23,7 +23,7 @@ Parameters: node_t * head - the node that defines the head of the list.
 return:     node_t * - returns a node_t pointer to the node at the head of the list.
 PreConditions: NA
 */
-node_t * order_sort(node_t* head, node_t* new)
+node_t * order_sort(node_t* head, node_t* new, int sort_type)
 {
     if (head == NULL) {
         new->next = NULL;
@@ -50,13 +50,34 @@ node_t * order_sort(node_t* head, node_t* new)
 			prev = NULL;
         }
 
-        if (new->statistic < cur->statistic) {
-            prev = cur;
-        } else if (new->statistic == cur->statistic) {
-            if (strcmp(new->field1, cur->field1) > 0) {
-				prev = cur;
-			} else break;
-        } else break;
+        switch (sort_type)
+        {
+            case 0:
+            // sort order smallest to largest in alphabetical order
+                if (new->statistic > cur->statistic) {
+                    prev = cur;
+                } else if (new->statistic == cur->statistic) {
+                    if (strcmp(new->field1, cur->field1) > 0) {
+                        prev = cur;
+                    } else break;
+                } else break;
+                break; // exit case 0
+
+            case 1:
+            // sort order largest to smallest in alphabetical order
+                if (new->statistic < cur->statistic) {
+                    prev = cur;
+                } else if (new->statistic == cur->statistic) {
+                    if (strcmp(new->field1, cur->field1) > 0) {
+                        prev = cur;
+                    } else break;
+                } else break;
+
+                break; // exit case 1
+
+            default:
+                break; // do nothing
+        }
     }
 
     // set new node to point to the next
