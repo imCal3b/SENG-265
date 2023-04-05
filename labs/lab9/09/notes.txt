@@ -1,0 +1,3 @@
+running a doctest from the command line
+
+python -m doctest <test_file.txt> ./<python_file>.py -v
