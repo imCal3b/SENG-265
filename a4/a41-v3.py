@@ -68,7 +68,9 @@ def writeHTMLHeader(f: IO[str], winTitle: str) -> None:
 
 def writeHTMLfile() -> None:
     """writeHTMLfile method"""
-    fnam: str = "my-Part1-V2-Art.html"
+    print("in html write")
+
+    fnam: str = "./a4/my-Part1-V2-Art.html" #TODO: added ./a4/ to run code in vsCode
     winTitle = "My Art"
     f: IO[str] = open(fnam, "w")
     writeHTMLHeader(f, winTitle)
