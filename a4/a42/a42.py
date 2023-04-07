@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Assignment 4 Part 1 | Brayden Shkwarok V00866278"""
+"""Assignment 4 Part 2 | Brayden Shkwarok V00866278"""
 from typing import IO
 from collections import namedtuple
 
@@ -8,11 +8,16 @@ cir = namedtuple('cir',['x','y','radius']) # circle
 rec = namedtuple('rec',['x','y','h','w']) # rectangle
 eli = namedtuple('eli',['x','y','rx','ry']) # ellipse
 
+coord = namedtuple('coord',['x_min','x_max','y_min','y_max']) # shape coordinate
+eli_rad = namedtuple('eli_rad',['rx_min','rx_max','ry_min','ry_max']) # ellipse radius
+rec_dim = namedtuple('rec_dim',['w_min','w_max','h_min','h_max']) #rectangle dimensions
+
 class Shape:
     """Shape Class"""
     __num_shapes: int = 0
 
     def __init__(self, x:int, y:int, colour:namedtuple) -> None:
+        """Shape constructor"""
         self.x: int = x
         self.y: int = y
         self.red: int = colour.red
@@ -24,6 +29,7 @@ class Shape:
 
     @classmethod
     def get_shape_count(cls) -> int:
+        """get_shape_count() method"""
         return cls.__num_shapes
 
 
@@ -31,6 +37,7 @@ class CircleShape(Shape):
     """CircleShape Class"""
 
     def __init__(self, cir:namedtuple, colour:namedtuple) -> None:
+        """Circle constructor"""
         super().__init__(cir.x, cir.y, colour)
         self.radius = cir.radius
 
@@ -47,13 +54,14 @@ class RectangleShape(Shape):
     """RectangleShape Class"""
     
     def __init__(self, rec:namedtuple, colour:namedtuple) -> None:
+        """Rectangle constructor"""
         super().__init__(rec.x, rec.y, colour)
         self.h = rec.h
         self.w = rec.w
 
     @classmethod
     def drawRectangleLine(cls, f: IO[str], t: int, r: 'RectangleShape') -> None:
-        """drawRectangle method"""
+        """drawRectangleLine() method"""
         ts: str = "   " * t
         line1: str = f'<rect x="{r.x}" y="{r.y}" width="{r.w}" height="{r.h}" '
         line2: str = f'fill="rgb({r.red}, {r.green}, {r.blue})" fill-opacity="{r.opac}"></rect>'
@@ -64,13 +72,14 @@ class EllipseShape(Shape):
     """EllipseShape Class"""
 
     def __init__(self, eli:namedtuple, colour:namedtuple) -> None:
+        """Ellipse constructor"""
         super().__init__(eli.x, eli.y, colour)
         self.rx = eli.rx
         self.ry = eli.ry
 
     @classmethod
     def drawEllipseLine(cls, f: IO[str], t: int, e: 'EllipseShape') -> None:
-        """drawEllipse method"""
+        """drawEllipseLine() method"""
         ts: str = "   " * t
         line1: str = f'<ellipse cx="{e.x}" cy="{e.y}" rx="{e.rx}" ry="{e.ry}" '
         line2: str = f'fill="rgb({e.red}, {e.green}, {e.blue})" fill-opacity="{e.opac}"></ellipse>'
@@ -82,14 +91,14 @@ class HtmlDocument:
 
     @classmethod
     def writeHTMLline(cls,f: IO[str], t: int, line: str) -> None:
-     """writeLineHTML method"""
+     """writeHTMLline() method"""
      ts = "   " * t
      f.write(f"{ts}{line}\n")
 
 
     @classmethod
     def writeHTMLHeader(cls,f: IO[str], title: str) -> None:
-        """writeHeadHTML method"""
+        """writeHTMLHeader() method"""
         cls.writeHTMLline(f, 0, "<html>")
         cls.writeHTMLline(f, 0, "<head>")
         cls.writeHTMLline(f, 1, f"<title>{title}</title>")
@@ -99,15 +108,15 @@ class HtmlDocument:
 
     @classmethod
     def writeHTMLcomment(cls,f: IO[str], t: int, com: str) -> None:
-        """writeHTMLcomment method"""
+        """writeHTMLcomment() method"""
         ts: str = "   " * t
         f.write(f"{ts}<!--{com}-->\n")
 
 
     @classmethod
     def writeHTMLfile(cls) -> None:
-        """writeHTMLfile method"""
-        fnam: str = "./a4/my-Part1-Art.html" #TODO: added ./a4/ to run code in vsCode
+        """writeHTMLfile() method"""
+        fnam: str = "./a4/a41/a41.html" #TODO: added ./a4/ to run code in vsCode
         title = "My Art"
         f: IO[str] = open(fnam, "w")
         cls.writeHTMLHeader(f, title)
@@ -122,7 +131,7 @@ class SvgCanvas:
 
     @classmethod
     def openSVGcanvas(cls,f: IO[str], t: int, canvas: tuple) -> None:
-        """openSVGcanvas method"""
+        """openSVGcanvas() method"""
         ts: str = "   " * t
         HtmlDocument.writeHTMLcomment(f, t, "Define SVG drawing box")
         f.write(f'{ts}<svg width="{canvas[0]}" height="{canvas[1]}">\n')
@@ -130,11 +139,23 @@ class SvgCanvas:
 
     @classmethod
     def closeSVGcanvas(cls,f: IO[str], t: int) -> None:
-        """closeSVGcanvas method"""
+        """closeSVGcanvas() method"""
         ts: str = "   " * t
         f.write(f"{ts}</svg>\n")
         f.write(f"</body>\n")
         f.write(f"</html>\n")
+
+
+class PyArtConfig:
+    """PyArtConfig Class"""
+    cnt: tuple = tuple(0,0)
+    sha: tuple = tuple(0,3) # TODO: change upper bound based on inclusion
+    coord: namedtuple = coord(0,0)
+    rad: tuple = tuple()
+    eli_rad: namedtuple = eli_rad(0,0)
+    rec_dim: namedtuple = rec_dim(0,0)
+    red: int = 0
+    green: int
 
 
 #-----------------------------------------------------------------------
