@@ -148,7 +148,6 @@ class HtmlDocument:
     @classmethod
     def writeHTMLfile(cls, canvas:tuple, config:PyArtConfig, fnam:str) -> None:
         """writeHTMLfile() method"""
-        # fnam: str = "./a4/a43/a43.html" #TODO: added ./a4/ to run code in vsCode
         title = "My Art"
         f: IO[str] = open(fnam, "w")
         cls.writeHTMLHeader(f, title)
@@ -253,13 +252,13 @@ class RandomShape:
 #-----------------------------------------------------------------------
 def main() -> None:
     """Main method"""
-    fnam: str = "./a4/a43/a431.html"
+    fnam: str = "./a431.html"
     HtmlDocument.writeHTMLfile((500,300), PyArtConfig(count=cnt(0,15), c_blue=blue(50,150), c_red=red(50,200), c_green=green(15,30), c_opac=opac(0.3,1)), fnam)
 
-    fnam: str = "./a4/a43/a432.html"
+    fnam: str = "./a432.html"
     HtmlDocument.writeHTMLfile((500,500), PyArtConfig(count=cnt(0,500), c_green=green(100,255), c_red=red(50,200), c_opac=opac(0.3,0.8)), fnam)
 
-    fnam: str = "./a4/a43/a433.html"
+    fnam: str = "./a433.html"
     HtmlDocument.writeHTMLfile((800,500), PyArtConfig(count=cnt(0,100), shape=sha(1,2), c_blue=blue(50,150), c_red=red(0,0), c_green=green(0,50)), fnam)
 
 if __name__ == "__main__":

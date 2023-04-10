@@ -112,7 +112,7 @@ class HtmlDocument:
     @classmethod
     def writeHTMLfile(cls) -> None:
         """writeHTMLfile() method"""
-        fnam: str = "./a4/a41/a41.html" #TODO: added ./a4/ to run code in vsCode
+        fnam: str = "./a41.html" #TODO: added ./a4/ to run code in vsCode
         title = "My Art"
         f: IO[str] = open(fnam, "w")
         cls.writeHTMLHeader(f, title)
