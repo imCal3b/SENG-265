@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 """Assignment 4 Part 2 | Brayden Shkwarok V00866278"""
-from typing import IO
 from collections import namedtuple
 import random as r
 
@@ -28,6 +27,7 @@ class PyArtConfig:
                  eli_radius:namedtuple = eli_rad(10,30,10,30), rec_dimensions:namedtuple = rec_dim(0,100,0,100),
                  c_red:namedtuple = red(0,255), c_green:namedtuple = green(0,255),
                  c_blue:namedtuple = blue(0,255), c_opac:namedtuple = opac(0.0,1.0)) -> None:
+        """PyArtConfig constructor"""
         cls.cnt = count
         cls.sha = shape
         cls.coord = coordinate
@@ -60,29 +60,34 @@ class RandomShape:
         B:int = r.randint(cls.config.blue.min, cls.config.blue.max)
         OP:int= r.uniform(cls.config.opac.min, cls.config.opac.max)
 
-        return f"{cnt:>3} {sha:>3} {x:>3} {y:>3} {rad:>3} {rx:>3} {ry:>3} {w:>3} {h:>3} {R:>3} {G:>3} {B:>3} {OP:>.1f}"
+        string1:str = f"{cnt:>3} {sha:>3} {x:>3} {y:>3} {rad:>3} {rx:>3} {ry:>3} {w:>3} {h:>3} "
+        string2:str = f"{R:>3} {G:>3} {B:>3} {OP:>.1f}"
+
+        return f"{string1}{string2}"
 
     @classmethod
-    def as_svg(cls, f:IO[str], t:int) -> str:
+    def as_svg(cls, cnt:int) -> str:
         """as_svg() method"""
-        string:str = cls.as_Part2_line()
+        string:str = cls.as_Part2_line(cnt)
         vals:tuple = tuple(map(float, string.split()))
         
         shape:int = vals[1]
-        colour:namedtuple = col(int(vals[9]),int(vals[10]),int(vals[11]),int(vals[12]))
+        string_colour:str = f'fill="rgb({int(vals[9])},{int(vals[10])},{int(vals[11])})" fill-opacity="{vals[12]}">'
 
         if shape == 0:
-            circle:namedtuple = cir(int(vals[2]),int(vals[3]),int(vals[4]))
-            # new_circle:CircleShape = CircleShape(circle, colour)
-            # return CircleShape(f, t, new_circle)
+            string_circle:str = f'<circle cx="{int(vals[2])}" cy="{int(vals[3])}" r="{int(vals[4])}" '
+            string_circle_end:str = '</circle>'
+            return f"{string_circle}{string_colour}{string_circle_end}"
         
         elif shape == 1:
-            rectangle:namedtuple = rec(int(vals[2]),int(vals[3]),int(vals[7]),int(vals[8]))
-            # new_rectangle:RectangleShape = RectangleShape(rectangle, colour)
+            string_rect:str = f'<rect x="{int(vals[2])}" y="{int(vals[3])}" width="{int(vals[7])}" height="{int(vals[8])}" '
+            string_rect_end:str = '</rect>'
+            return f"{string_rect}{string_colour}{string_rect_end}"
 
         else:
-            ellipse:namedtuple = eli(int(vals[2]),int(vals[3]),int(vals[5]),int(vals[6]))
-            # new_ellipse:EllipseShape = EllipseShape(ellipse, colour)
+            string_ellipse:str = f'<rect cx="{int(vals[2])}" cy="{int(vals[3])}" rx="{int(vals[7])}" ry="{int(vals[8])}" '
+            string_ellipse_end:str = '</ellipse>'
+            return f"{string_ellipse}{string_colour}{string_ellipse_end}"
 
 
     def __str__(cls) -> str:
@@ -98,6 +103,7 @@ class RandomShape:
 def main() -> None:
     """Main method"""
     shape_table = RandomShape()
+    print()
     print(shape_table)
 
 
